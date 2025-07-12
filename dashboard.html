@@ -2,14 +2,58 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | IndoCapital</title>
   <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background: #f8f9fa;
+    }
+    h2 {
+      text-align: center;
+    }
+    #userInfo {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      line-height: 1.8em;
+    }
+    .buttons {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .buttons a, .buttons button {
+      padding: 10px 20px;
+      margin: 5px;
+      text-decoration: none;
+      border: none;
+      background: #3498db;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #logout {
+      background: #e74c3c;
+    }
+  </style>
 </head>
 <body>
   <h2>Dashboard Investor</h2>
-  <p id="userInfo">Memuat data pengguna...</p>
-  <button id="logout">Keluar</button>
+  <div id="userInfo">Memuat data pengguna...</div>
+
+  <div class="buttons">
+    <a href="profil.html">Lihat Profil</a>
+    <a href="deposit.html">Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="riwayat.html">Riwayat Transaksi</a>
+    <button id="logout">Keluar</button>
+  </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
@@ -17,9 +61,25 @@
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        document.getElementById('userInfo').innerText = 'Email: ' + userSnap.data().email;
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            document.getElementById('userInfo').innerHTML = `
+              <strong>Halo, ${data.nama || user.email}</strong><br>
+              Email: ${data.email}<br>
+              No. HP: ${data.telepon || '-'}<br>
+              Saldo: <strong>Rp ${Number(data.saldo || 0).toLocaleString()}</strong>
+            `;
+          } else {
+            document.getElementById('userInfo').innerText = 'Data pengguna tidak ditemukan di database.';
+          }
+        } catch (error) {
+          console.error(error);
+          document.getElementById('userInfo').innerText = 'Gagal memuat data pengguna.';
+        }
       } else {
         window.location.href = 'index.html';
       }
