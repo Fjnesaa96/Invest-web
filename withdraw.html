@@ -46,16 +46,35 @@
     <label for="nominal">Nominal Penarikan (Rp)</label>
     <input type="number" id="nominal" required />
 
-    <label for="bank">Bank Tujuan</label>
-    <select id="bank" required>
+    <label for="metode">Metode Penarikan</label>
+    <select id="metode" required>
       <option value="">Pilih</option>
-      <option value="BCA">BCA</option>
-      <option value="BNI">BNI</option>
-      <option value="BRI">BRI</option>
-      <option value="Mandiri">Mandiri</option>
+      <option value="Bank">Transfer Bank</option>
+      <option value="Ewallet">E-Wallet (DANA, OVO, GoPay)</option>
     </select>
 
-    <label for="rekening">Nomor Rekening</label>
+    <div id="bankSection">
+      <label for="bank">Bank Tujuan</label>
+      <select id="bank">
+        <option value="">Pilih</option>
+        <option value="BCA">BCA</option>
+        <option value="BNI">BNI</option>
+        <option value="BRI">BRI</option>
+        <option value="Mandiri">Mandiri</option>
+      </select>
+    </div>
+
+    <div id="ewalletSection" style="display: none;">
+      <label for="ewallet">Jenis E-Wallet</label>
+      <select id="ewallet">
+        <option value="">Pilih</option>
+        <option value="DANA">DANA</option>
+        <option value="OVO">OVO</option>
+        <option value="GoPay">GoPay</option>
+      </select>
+    </div>
+
+    <label for="rekening">Nomor Rekening / Nomor HP E-Wallet</label>
     <input type="text" id="rekening" required />
 
     <button type="submit" id="submitBtn">Kirim Withdraw</button>
@@ -68,11 +87,22 @@
 
     const form = document.getElementById('withdrawForm');
     const statusMsg = document.getElementById('statusMsg');
+    const metodeSelect = document.getElementById('metode');
+    const bankSection = document.getElementById('bankSection');
+    const ewalletSection = document.getElementById('ewalletSection');
+
+    metodeSelect.addEventListener('change', () => {
+      const metode = metodeSelect.value;
+      bankSection.style.display = metode === 'Bank' ? 'block' : 'none';
+      ewalletSection.style.display = metode === 'Ewallet' ? 'block' : 'none';
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nominal = parseInt(document.getElementById('nominal').value);
+      const metode = document.getElementById('metode').value;
       const bank = document.getElementById('bank').value;
+      const ewallet = document.getElementById('ewallet').value;
       const rekening = document.getElementById('rekening').value;
 
       const user = auth.currentUser;
@@ -81,8 +111,8 @@
         return;
       }
 
-      if (nominal <= 0) {
-        statusMsg.innerHTML = '<p class="error">Nominal tidak valid.</p>';
+      if (nominal <= 0 || !metode || !rekening) {
+        statusMsg.innerHTML = '<p class="error">Mohon lengkapi semua field.</p>';
         return;
       }
 
@@ -91,13 +121,17 @@
           userId: user.uid,
           email: user.email,
           nominal,
-          bank,
+          metode,
+          bank: metode === 'Bank' ? bank : '',
+          ewallet: metode === 'Ewallet' ? ewallet : '',
           rekening,
           status: 'pending',
           createdAt: Timestamp.now()
         });
         statusMsg.innerHTML = '<p class="success">Permintaan withdraw dikirim!</p>';
         form.reset();
+        bankSection.style.display = 'block';
+        ewalletSection.style.display = 'none';
       } catch (err) {
         console.error(err);
         statusMsg.innerHTML = '<p class="error">Gagal mengirim withdraw.</p>';
