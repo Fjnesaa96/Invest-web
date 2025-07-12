@@ -14,7 +14,7 @@
       display: block;
       margin: 10px 0;
       padding: 10px;
-      width: 250px;
+      width: 280px;
     }
     button {
       padding: 10px 20px;
@@ -24,8 +24,11 @@
 </head>
 <body>
   <h2>Daftar IndoCapital</h2>
-  <input type="email" id="email" placeholder="Masukkan Email" />
-  <input type="password" id="password" placeholder="Masukkan Kata Sandi" />
+  <input type="text" id="nama" placeholder="Nama Lengkap" />
+  <input type="text" id="telepon" placeholder="Nomor HP (+62...)" />
+  <input type="text" id="referral" placeholder="Kode Referral (opsional)" />
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Kata Sandi (min 6 karakter)" />
   <input type="password" id="confirmPassword" placeholder="Konfirmasi Kata Sandi" />
   <button onclick="registerUser()">Daftar</button>
   <p>Sudah punya akun? <a href="index.html">Login</a></p>
@@ -35,10 +38,21 @@
     const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = firebaseObj;
 
     window.registerUser = async () => {
+      const nama = document.getElementById('nama').value;
+      const telepon = document.getElementById('telepon').value;
+      const referral = document.getElementById('referral').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
+      if (!nama || !telepon || !email || !password) {
+        alert('Harap isi semua field wajib.');
+        return;
+      }
+      if (password.length < 6) {
+        alert('Password minimal 6 karakter');
+        return;
+      }
       if (password !== confirmPassword) {
         alert('Konfirmasi sandi tidak cocok');
         return;
@@ -50,6 +64,9 @@
 
         await setDoc(doc(db, "users", user.uid), {
           email: user.email,
+          nama,
+          telepon,
+          referral,
           saldo: 0
         });
 
