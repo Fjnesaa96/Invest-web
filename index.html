@@ -1,170 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Good Invest Platform</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk | IndoCapital</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0b0c10;
-      color: #fff;
-    }
-    .container {
+      padding: 0;
+      background-color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
     }
-    .card {
-      background-color: #1f1f1f;
-      padding: 30px;
-      border-radius: 12px;
-      width: 100%;
+
+    .logo {
+      margin-top: 40px;
+    }
+
+    .logo img {
+      max-width: 250px;
+    }
+
+    .form-container {
+      margin-top: 30px;
+      width: 90%;
       max-width: 400px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
+
+    .form-group {
+      margin-bottom: 15px;
     }
-    input, select, button {
+
+    input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px;
-      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #003c52;
+      color: white;
       border: none;
       border-radius: 8px;
-    }
-    input, select {
-      background-color: #2a2a2a;
-      color: #fff;
-    }
-    button {
-      background-color: #00e676;
-      color: #000;
       font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #00c853;
+
+    .btn:hover {
+      background-color: #025a73;
     }
-    .nav {
-      background-color: #121212;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
+
+    .link-register {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
     }
-    .nav a {
-      color: #ccc;
-      text-decoration: none;
-      font-size: 0.9em;
-    }
-    .nav a.active {
-      color: #00e676;
-      font-weight: bold;
-    }
-    .section {
-      display: none;
-    }
-    .section.active {
-      display: block;
+
+    .link-register a {
+      color: #000;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- LOGIN -->
-    <div class="card section active" id="login-section">
-      <h2>Login</h2>
-      <input type="email" placeholder="Email" id="login-email">
-      <input type="password" placeholder="Password" id="login-password">
-      <button onclick="login()">Login</button>
-    </div>
 
-    <!-- DASHBOARD -->
-    <div class="card section" id="dashboard-section">
-      <h2>Dashboard</h2>
-      <p>Welcome, <span id="user-email"></span></p>
-      <button onclick="showSection('payment-section')">Bayar Investasi</button>
-    </div>
+  <div class="logo">
+    <img src="assets/logo_login.jpg" alt="Logo IndoCapital">
+  </div>
 
-    <!-- PAYMENT -->
-    <div class="card section" id="payment-section">
-      <h2>Pembayaran</h2>
-      <select id="invest-option">
-        <option value="">Pilih Produk Investasi</option>
-        <option value="reksa">Reksa Dana</option>
-        <option value="saham">Saham</option>
-        <option value="crypto">Crypto</option>
-      </select>
-      <input type="number" placeholder="Nominal Investasi (Rp)" id="amount">
-      <button onclick="bayar()">Bayar Sekarang</button>
+  <div class="form-container">
+    <form>
+      <div class="form-group">
+        <input type="text" placeholder="Masukkan nomor ponsel Anda" required>
+      </div>
+      <div class="form-group">
+        <input type="password" placeholder="Masukkan kata kunci" required>
+      </div>
+      <button class="btn" type="submit">Gabung</button>
+    </form>
+    <div class="link-register">
+      <a href="register.html">Daftar</a>
     </div>
   </div>
 
-  <div class="nav">
-    <a href="#" class="active" onclick="showSection('dashboard-section')">Dashboard</a>
-    <a href="#" onclick="showSection('payment-section')">Pembayaran</a>
-    <a href="#" onclick="logout()">Keluar</a>
-  </div>
-
-  <script>
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-
-      document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
-      const links = {
-        'dashboard-section': 0,
-        'payment-section': 1
-      };
-      if (links[id] !== undefined) document.querySelectorAll('.nav a')[links[id]].classList.add('active');
-    }
-
-    function login() {
-      const email = document.getElementById('login-email').value;
-      const pass = document.getElementById('login-password').value;
-      if (email && pass) {
-        localStorage.setItem('user', email);
-        document.getElementById('user-email').textContent = email;
-        showSection('dashboard-section');
-      } else {
-        alert('Email dan Password harus diisi');
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('user');
-      showSection('login-section');
-    }
-
-    function bayar() {
-      const produk = document.getElementById('invest-option').value;
-      const jumlah = document.getElementById('amount').value;
-      if (!produk || !jumlah) {
-        alert('Lengkapi data terlebih dahulu');
-        return;
-      }
-      alert(`Pembayaran sebesar Rp${jumlah} untuk ${produk} berhasil!`);
-      showSection('dashboard-section');
-    }
-
-    window.onload = function() {
-      const user = localStorage.getItem('user');
-      if (user) {
-        document.getElementById('user-email').textContent = user;
-        showSection('dashboard-section');
-      }
-    }
-  </script>
 </body>
 </html>
