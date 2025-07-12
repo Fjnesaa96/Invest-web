@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Deposit Masuk</title>
+  <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      background-color: #f8f9fa;
+    }
+    h2 {
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .card p {
+      margin: 5px 0;
+    }
+    .card button {
+      margin-right: 10px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .approve {
+      background-color: #2ecc71;
+      color: white;
+    }
+    .view {
+      background-color: #3498db;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel - Deposit Masuk</h2>
+  <div id="depositList">Memuat data...</div>
+
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { db, collection, query, where, orderBy, getDocs, updateDoc, doc, Timestamp } = firebaseObj;
+
+    const depositList = document.getElementById('depositList');
+
+    async function loadDeposits() {
+      depositList.innerHTML = '<p>Memuat data...</p>';
+
+      const q = query(
+        collection(db, 'deposit'),
+        where('status', '==', 'pending'),
+        orderBy('createdAt', 'desc')
+      );
+
+      const snapshot = await getDocs(q);
+      depositList.innerHTML = '';
+
+      if (snapshot.empty) {
+        depositList.innerHTML = '<p>Tidak ada deposit pending.</p>';
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement('div');
+        div.classList.add('card');
+
+        div.innerHTML = `
+          <p><strong>${data.email}</strong></p>
+          <p>Nominal: Rp ${Number(data.nominal).toLocaleString()}</p>
+          <p>Metode: ${data.metode}</p>
+          ${data.bukti ? `<p><button class="view" onclick="window.open('${data.bukti}', '_blank')">Lihat Bukti</button></p>` : ''}
+          <p>Status: <span style="color: orange;">${data.status}</span></p>
+          <button class="approve">Setujui</button>
+        `;
+
+        div.querySelector('.approve').addEventListener('click', async () => {
+          await updateDoc(doc(db, 'deposit', docSnap.id), {
+            status: 'approved',
+            approvedAt: Timestamp.now()
+          });
+          alert('Deposit disetujui.');
+          div.remove();
+        });
+
+        depositList.appendChild(div);
+      });
+    }
+
+    loadDeposits();
+  </script>
+</body>
+</html>
