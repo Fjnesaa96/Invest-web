@@ -1,7 +1,14 @@
 // firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDoc, getDocs, doc, updateDoc, query, where, orderBy, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCyXfGd92WDVlKapqTtfUAlElfwICxjzNc",
@@ -14,7 +21,28 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
 
-export const firebaseObj = { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, doc, setDoc, getDoc };
+// Export semua fungsi yang digunakan
+export const firebaseObj = {
+  auth,
+  db,
+  storage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  signOut,
+  onAuthStateChanged
+};
