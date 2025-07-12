@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | IndoCapital</title>
+  <script type="module" src="firebase.js"></script>
+</head>
+<body>
+  <h2>Dashboard Investor</h2>
+  <p id="userInfo">Memuat data pengguna...</p>
+  <button id="logout">Keluar</button>
+
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, db, doc, getDoc, signOut } = firebaseObj;
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        document.getElementById('userInfo').innerText = 'Email: ' + userSnap.data().email;
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
