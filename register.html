@@ -1,40 +1,71 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Daftar | IndoCapital</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login IndoCapital</title>
   <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Daftar IndoCapital</h2>
-  <form id="registerForm">
-    <input type="email" id="email" placeholder="Email" required /><br/>
-    <input type="password" id="password" placeholder="Kata Sandi" required /><br/>
-    <input type="password" id="confirm" placeholder="Ulangi Sandi" required /><br/>
-    <button type="submit">Daftar</button>
-  </form>
-  <p>Sudah punya akun? <a href="index.html">Login</a></p>
+  <h2>Masuk IndoCapital</h2>
+  <input type="text" id="phone" placeholder="Masukkan nomor HP (+62...)" />
+  <div id="recaptcha-container"></div>
+  <button onclick="sendOTP()">Kirim Kode OTP</button>
+
+  <input type="text" id="otp" placeholder="Masukkan kode OTP" />
+  <button onclick="verifyOTP()">Verifikasi & Masuk</button>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = firebaseObj;
+    const { auth, signInWithPhoneNumber, RecaptchaVerifier } = firebaseObj;
 
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const confirm = document.getElementById('confirm').value;
-      if (password !== confirm) return alert('Sandi tidak cocok!');
+    let confirmationResult;
+
+    // Setup invisible reCAPTCHA
+    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: response => {
+        // reCAPTCHA solved
+      },
+    }, auth);
+
+    window.sendOTP = async () => {
+      const phoneNumber = document.getElementById('phone').value;
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await setDoc(doc(db, 'users', user.uid), { email });
+        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+        alert('Kode OTP dikirim ke ' + phoneNumber);
+      } catch (error) {
+        alert('Gagal mengirim OTP: ' + error.message);
+      }
+    };
+
+    window.verifyOTP = async () => {
+      const code = document.getElementById('otp').value;
+      try {
+        const result = await confirmationResult.confirm(code);
+        const user = result.user;
+        alert('Berhasil login sebagai: ' + user.phoneNumber);
         window.location.href = 'dashboard.html';
       } catch (error) {
-        alert('Gagal daftar: ' + error.message);
+        alert('Verifikasi gagal: ' + error.message);
       }
-    });
+    };
   </script>
 </body>
 </html>
