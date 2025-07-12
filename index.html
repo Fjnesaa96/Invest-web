@@ -1,94 +1,35 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Masuk | IndoCapital</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .logo {
-      margin-top: 40px;
-    }
-
-    .logo img {
-      max-width: 250px;
-    }
-
-    .form-container {
-      margin-top: 30px;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background-color: #003c52;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #025a73;
-    }
-
-    .link-register {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .link-register a {
-      color: #000;
-      text-decoration: underline;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | IndoCapital</title>
+  <script type="module" src="firebase.js"></script>
 </head>
 <body>
+  <h2>Login IndoCapital</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required /><br/>
+    <input type="password" id="password" placeholder="Kata Sandi" required /><br/>
+    <button type="submit">Masuk</button>
+  </form>
+  <p>Belum punya akun? <a href="register.html">Daftar</a></p>
 
-  <div class="logo">
-    <img src="assets/logo_login.jpg" alt="Logo IndoCapital">
-  </div>
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, signInWithEmailAndPassword } = firebaseObj;
 
-  <div class="form-container">
-    <form>
-      <div class="form-group">
-        <input type="text" placeholder="Masukkan nomor ponsel Anda" required>
-      </div>
-      <div class="form-group">
-        <input type="password" placeholder="Masukkan kata kunci" required>
-      </div>
-      <button class="btn" type="submit">Gabung</button>
-    </form>
-    <div class="link-register">
-      <a href="register.html">Daftar</a>
-    </div>
-  </div>
-
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Login gagal: ' + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
