@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deposit Dana - IndoCapital</title>
+  <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    #submitBtn {
+      padding: 10px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .success, .error {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>Deposit Dana</h2>
+  <form id="depositForm">
+    <label for="nominal">Nominal Deposit (Rp)</label>
+    <input type="number" id="nominal" required />
+
+    <label for="metode">Metode Deposit</label>
+    <select id="metode" required>
+      <option value="">Pilih</option>
+      <option value="Manual">Manual Transfer</option>
+      <option value="Otomatis">Otomatis (Virtual Account)</option>
+    </select>
+
+    <label for="bukti">Upload Bukti Transfer (jika manual)</label>
+    <input type="file" id="bukti" accept="image/*" />
+
+    <button type="submit" id="submitBtn">Kirim Deposit</button>
+    <div id="statusMsg"></div>
+  </form>
+
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, db, storage, ref, uploadBytes, getDownloadURL, collection, addDoc, Timestamp } = firebaseObj;
+
+    const form = document.getElementById('depositForm');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nominal = document.getElementById('nominal').value;
+      const metode = document.getElementById('metode').value;
+      const bukti = document.getElementById('bukti').files[0];
+
+      const user = auth.currentUser;
+      if (!user) {
+        statusMsg.innerHTML = '<p class="error">Anda belum login.</p>';
+        return;
+      }
+
+      let buktiUrl = '';
+      if (bukti) {
+        const buktiRef = ref(storage, `bukti_deposit/${user.uid}_${Date.now()}`);
+        await uploadBytes(buktiRef, bukti);
+        buktiUrl = await getDownloadURL(buktiRef);
+      }
+
+      try {
+        await addDoc(collection(db, 'deposit'), {
+          userId: user.uid,
+          email: user.email,
+          nominal: parseInt(nominal),
+          metode,
+          bukti: buktiUrl,
+          status: 'pending',
+          createdAt: Timestamp.now()
+        });
+        statusMsg.innerHTML = '<p class="success">Deposit berhasil dikirim!</p>';
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        statusMsg.innerHTML = '<p class="error">Gagal mengirim deposit.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
