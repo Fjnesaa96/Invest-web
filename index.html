@@ -1,80 +1,171 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login - Good Invest</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Good Invest Platform</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #0b0c10;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       color: #fff;
     }
-    .login-container {
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
       background-color: #1f1f1f;
-      padding: 40px;
+      padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
     }
-    .login-container h2 {
-      margin-bottom: 20px;
+    h2 {
       text-align: center;
-      font-weight: 600;
-    }
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 14px;
       margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
       border: none;
       border-radius: 8px;
+    }
+    input, select {
       background-color: #2a2a2a;
       color: #fff;
     }
-    input[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
+    button {
       background-color: #00e676;
       color: #000;
       font-weight: bold;
       cursor: pointer;
     }
-    input[type="submit"]:hover {
+    button:hover {
       background-color: #00c853;
     }
-    .footer {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 0.9em;
-      color: #bbb;
+    .nav {
+      background-color: #121212;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
     }
-    .footer a {
-      color: #00e676;
+    .nav a {
+      color: #ccc;
       text-decoration: none;
+      font-size: 0.9em;
+    }
+    .nav a.active {
+      color: #00e676;
+      font-weight: bold;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>GOOD INVEST</h2>
-    <form action="/dashboard" method="POST">
-      <input type="email" placeholder="Email" required>
-      <input type="password" placeholder="Password" required>
-      <input type="submit" value="Login">
-    </form>
-    <div class="footer">
-      Belum punya akun? <a href="#">Daftar di sini</a>
+  <div class="container">
+    <!-- LOGIN -->
+    <div class="card section active" id="login-section">
+      <h2>Login</h2>
+      <input type="email" placeholder="Email" id="login-email">
+      <input type="password" placeholder="Password" id="login-password">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="card section" id="dashboard-section">
+      <h2>Dashboard</h2>
+      <p>Welcome, <span id="user-email"></span></p>
+      <button onclick="showSection('payment-section')">Bayar Investasi</button>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="card section" id="payment-section">
+      <h2>Pembayaran</h2>
+      <select id="invest-option">
+        <option value="">Pilih Produk Investasi</option>
+        <option value="reksa">Reksa Dana</option>
+        <option value="saham">Saham</option>
+        <option value="crypto">Crypto</option>
+      </select>
+      <input type="number" placeholder="Nominal Investasi (Rp)" id="amount">
+      <button onclick="bayar()">Bayar Sekarang</button>
     </div>
   </div>
+
+  <div class="nav">
+    <a href="#" class="active" onclick="showSection('dashboard-section')">Dashboard</a>
+    <a href="#" onclick="showSection('payment-section')">Pembayaran</a>
+    <a href="#" onclick="logout()">Keluar</a>
+  </div>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+      const links = {
+        'dashboard-section': 0,
+        'payment-section': 1
+      };
+      if (links[id] !== undefined) document.querySelectorAll('.nav a')[links[id]].classList.add('active');
+    }
+
+    function login() {
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+      if (email && pass) {
+        localStorage.setItem('user', email);
+        document.getElementById('user-email').textContent = email;
+        showSection('dashboard-section');
+      } else {
+        alert('Email dan Password harus diisi');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('user');
+      showSection('login-section');
+    }
+
+    function bayar() {
+      const produk = document.getElementById('invest-option').value;
+      const jumlah = document.getElementById('amount').value;
+      if (!produk || !jumlah) {
+        alert('Lengkapi data terlebih dahulu');
+        return;
+      }
+      alert(`Pembayaran sebesar Rp${jumlah} untuk ${produk} berhasil!`);
+      showSection('dashboard-section');
+    }
+
+    // Auto-login if session exists
+    window.onload = function() {
+      const user = localStorage.getItem('user');
+      if (user) {
+        document.getElementById('user-email').textContent = user;
+        showSection('dashboard-section');
+      }
+    }
+  </script>
 </body>
 </html>
