@@ -23,47 +23,26 @@
   </style>
 </head>
 <body>
-  <h2>Masuk IndoCapital</h2>
-  <input type="text" id="phone" placeholder="Masukkan nomor HP (+62...)" />
-  <div id="recaptcha-container"></div>
-  <button onclick="sendOTP()">Kirim Kode OTP</button>
-
-  <input type="text" id="otp" placeholder="Masukkan kode OTP" />
-  <button onclick="verifyOTP()">Verifikasi & Masuk</button>
+  <h2>Login IndoCapital</h2>
+  <input type="email" id="email" placeholder="Masukkan Email" />
+  <input type="password" id="password" placeholder="Masukkan Kata Sandi" />
+  <button onclick="loginUser()">Login</button>
+  <p>Belum punya akun? <a href="register.html">Daftar</a></p>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, signInWithPhoneNumber, RecaptchaVerifier } = firebaseObj;
+    const { auth, signInWithEmailAndPassword } = firebaseObj;
 
-    let confirmationResult;
-
-    // Setup invisible reCAPTCHA
-    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-      size: 'invisible',
-      callback: response => {
-        // reCAPTCHA solved
-      },
-    }, auth);
-
-    window.sendOTP = async () => {
-      const phoneNumber = document.getElementById('phone').value;
+    window.loginUser = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
       try {
-        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-        alert('Kode OTP dikirim ke ' + phoneNumber);
-      } catch (error) {
-        alert('Gagal mengirim OTP: ' + error.message);
-      }
-    };
-
-    window.verifyOTP = async () => {
-      const code = document.getElementById('otp').value;
-      try {
-        const result = await confirmationResult.confirm(code);
-        const user = result.user;
-        alert('Berhasil login sebagai: ' + user.phoneNumber);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        alert('Login sukses: ' + user.email);
         window.location.href = 'dashboard.html';
       } catch (error) {
-        alert('Verifikasi gagal: ' + error.message);
+        alert('Gagal login: ' + error.message);
       }
     };
   </script>
