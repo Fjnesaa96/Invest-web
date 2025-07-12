@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - IndoCapital</title>
+  <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .card p {
+      margin: 5px 0;
+    }
+    .card button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #2ecc71;
+      color: white;
+    }
+    .pending {
+      color: orange;
+    }
+    .approved {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel - Konfirmasi Withdraw</h2>
+  <div id="withdrawList"></div>
+
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { db, collection, query, where, orderBy, getDocs, updateDoc, doc, Timestamp } = firebaseObj;
+
+    async function loadWithdraws() {
+      const listDiv = document.getElementById('withdrawList');
+      listDiv.innerHTML = '<p>Memuat data...</p>';
+
+      const q = query(
+        collection(db, 'withdraw'),
+        where('status', '==', 'pending'),
+        orderBy('createdAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      listDiv.innerHTML = '';
+
+      if (querySnapshot.empty) {
+        listDiv.innerHTML = '<p>Tidak ada permintaan withdraw pending.</p>';
+        return;
+      }
+
+      querySnapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement('div');
+        div.classList.add('card');
+
+        div.innerHTML = `
+          <p><strong>${data.email}</strong></p>
+          <p>Nominal: Rp ${Number(data.nominal).toLocaleString()}</p>
+          <p>Metode: ${data.metode || data.bank || data.ewallet}</p>
+          <p>Rekening/HP: ${data.rekening}</p>
+          <p>Status: <span class="pending">${data.status}</span></p>
+          <button>Setujui</button>
+        `;
+
+        div.querySelector('button').addEventListener('click', async () => {
+          await updateDoc(doc(db, 'withdraw', docSnap.id), {
+            status: 'approved',
+            approvedAt: Timestamp.now()
+          });
+          alert('Withdraw disetujui!');
+          div.remove();
+        });
+
+        listDiv.appendChild(div);
+      });
+    }
+
+    loadWithdraws();
+  </script>
+</body>
+</html>
