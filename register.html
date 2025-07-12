@@ -1,108 +1,40 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar | IndoCapital</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .logo {
-      margin-top: 40px;
-    }
-
-    .logo img {
-      max-width: 250px;
-    }
-
-    .form-container {
-      margin-top: 30px;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .captcha-img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background-color: #003c52;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #025a73;
-    }
-
-    .link-login {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .link-login a {
-      color: #000;
-      text-decoration: underline;
-    }
-  </style>
+  <script type="module" src="firebase.js"></script>
 </head>
 <body>
+  <h2>Daftar IndoCapital</h2>
+  <form id="registerForm">
+    <input type="email" id="email" placeholder="Email" required /><br/>
+    <input type="password" id="password" placeholder="Kata Sandi" required /><br/>
+    <input type="password" id="confirm" placeholder="Ulangi Sandi" required /><br/>
+    <button type="submit">Daftar</button>
+  </form>
+  <p>Sudah punya akun? <a href="index.html">Login</a></p>
 
-  <div class="logo">
-    <img src="assets/logo_register.jpg" alt="Logo IndoCapital">
-  </div>
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = firebaseObj;
 
-  <div class="form-container">
-    <form>
-      <div class="form-group">
-        <input type="text" placeholder="Masukkan nomor ponsel Anda" required>
-      </div>
-      <div class="form-group">
-        <input type="password" placeholder="Kata sandi (minimal 6 karakter)" required>
-      </div>
-      <div class="form-group">
-        <input type="password" placeholder="Konfirmasi sandi" required>
-      </div>
-      <div class="form-group">
-        <input type="text" placeholder="Masukkan captcha" required>
-        <img class="captcha-img" src="assets/captcha_dummy.jpg" alt="captcha">
-      </div>
-      <button class="btn" type="submit">Daftar</button>
-    </form>
-    <div class="link-login">
-      <a href="login.html">Sudah memiliki akun?</a>
-    </div>
-  </div>
-
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      if (password !== confirm) return alert('Sandi tidak cocok!');
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, 'users', user.uid), { email });
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert('Gagal daftar: ' + error.message);
+      }
+    });
+  </script>
 </body>
 </html>
