@@ -1,35 +1,50 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | IndoCapital</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login IndoCapital</title>
   <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h2>Login IndoCapital</h2>
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Email" required /><br/>
-    <input type="password" id="password" placeholder="Kata Sandi" required /><br/>
-    <button type="submit">Masuk</button>
-  </form>
+  <input type="email" id="email" placeholder="Masukkan Email" />
+  <input type="password" id="password" placeholder="Masukkan Kata Sandi" />
+  <button onclick="loginUser()">Login</button>
   <p>Belum punya akun? <a href="register.html">Daftar</a></p>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const { auth, signInWithEmailAndPassword } = firebaseObj;
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    window.loginUser = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        alert('Login sukses: ' + user.email);
         window.location.href = 'dashboard.html';
-      } catch (err) {
-        alert('Login gagal: ' + err.message);
+      } catch (error) {
+        alert('Gagal login: ' + error.message);
       }
-    });
+    };
   </script>
 </body>
 </html>
