@@ -7,78 +7,118 @@
   <script type="module" src="firebase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #2e7df6;
+      --bg: #f2f6fb;
+      --card: #ffffff;
+      --text: #333;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f4f7fc;
       margin: 0;
-      padding: 20px;
+      background: var(--bg);
+      color: var(--text);
     }
+
     .container {
-      max-width: 500px;
-      margin: auto;
-      background-color: #fff;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      max-width: 420px;
+      margin: 40px auto;
       padding: 25px;
+      background: var(--card);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
-    h2 {
+
+    .title {
       text-align: center;
-      color: #2e7df6;
-      margin-bottom: 10px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 24px;
     }
-    .user-info {
+
+    .user-box {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
-    .user-info p {
+
+    .user-box p {
       margin: 5px 0;
-      font-size: 16px;
-      color: #333;
     }
+
     .saldo {
-      background-color: #e6f0ff;
+      background: #e7f0ff;
       padding: 15px;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: center;
       font-size: 20px;
       font-weight: bold;
-      color: #2e7df6;
+      color: var(--primary);
       margin-bottom: 30px;
     }
-    .dashboard-buttons button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      background-color: #2e7df6;
-      color: #fff;
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .buttons button {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
       border: none;
       border-radius: 10px;
-      font-size: 16px;
+      background: var(--primary);
+      color: white;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    .dashboard-buttons button:hover {
-      background-color: #1a5fd1;
+
+    .buttons button:hover {
+      background: #1a5fd1;
+    }
+
+    .buttons button.logout {
+      background: #ff4f4f;
+    }
+
+    .buttons button.logout:hover {
+      background: #e83d3d;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 30px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>IndoCapital</h2>
-    <div class="user-info">
+    <h2 class="title">🏦 IndoCapital</h2>
+
+    <div class="user-box">
       <p id="nama">Memuat nama...</p>
       <p id="email">Memuat email...</p>
     </div>
+
     <div class="saldo" id="saldoBox">Saldo: Rp 0</div>
 
-    <div class="dashboard-buttons">
+    <div class="buttons">
       <button onclick="window.location.href='profil.html'">👤 Profil</button>
-      <button onclick="window.location.href='deposit.html'">💰 Deposit</button>
+      <button onclick="window.location.href='deposit.html'">💳 Deposit</button>
       <button onclick="window.location.href='withdraw.html'">📤 Withdraw</button>
       <button onclick="window.location.href='riwayat.html'">📄 Riwayat Transaksi</button>
-      <button onclick="logout()">🚪 Logout</button>
+      <button class="logout" onclick="logout()">🚪 Logout</button>
     </div>
+
+    <div class="footer">© 2025 IndoCapital</div>
   </div>
 
   <script type="module">
@@ -97,7 +137,7 @@
         const snap = await getDoc(userRef);
 
         if (!snap.exists()) {
-          namaEl.innerText = 'Data pengguna tidak ditemukan';
+          namaEl.innerText = 'Pengguna tidak ditemukan';
           return;
         }
 
@@ -117,4 +157,5 @@
     };
   </script>
 </body>
-</html>
+    </html>
+    
