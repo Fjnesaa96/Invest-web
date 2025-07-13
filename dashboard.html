@@ -1,161 +1,108 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard | IndoCapital</title>
   <script type="module" src="firebase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #2e7df6;
-      --bg: #f2f6fb;
-      --card: #ffffff;
-      --text: #333;
-    }
-
     body {
       font-family: 'Poppins', sans-serif;
+      background: #f5f7fc;
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
+      padding: 20px;
+      color: #333;
     }
-
     .container {
-      max-width: 420px;
-      margin: 40px auto;
-      padding: 25px;
-      background: var(--card);
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    .title {
-      text-align: center;
-      color: var(--primary);
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-
-    .user-box {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .user-box p {
-      margin: 5px 0;
-    }
-
-    .saldo {
-      background: #e7f0ff;
-      padding: 15px;
+      max-width: 480px;
+      margin: auto;
+      background: #fff;
       border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.05);
       text-align: center;
-      font-size: 20px;
+    }
+    h2 {
+      color: #2e7df6;
+    }
+    .saldo {
+      font-size: 1.3em;
+      margin-bottom: 20px;
       font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 30px;
     }
-
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .buttons button {
+    button {
+      width: 100%;
       padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
+      margin: 10px 0;
+      font-size: 1em;
+      font-weight: bold;
       border: none;
-      border-radius: 10px;
-      background: var(--primary);
-      color: white;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      transition: 0.2s ease;
     }
-
-    .buttons button:hover {
-      background: #1a5fd1;
+    .btn-primary {
+      background: #2e7df6;
+      color: white;
     }
-
-    .buttons button.logout {
-      background: #ff4f4f;
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
     }
-
-    .buttons button.logout:hover {
-      background: #e83d3d;
+    .btn-outline {
+      background: white;
+      border: 2px solid #2e7df6;
+      color: #2e7df6;
     }
-
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      margin-top: 30px;
-      color: #aaa;
+    .status {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: red;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2 class="title">🏦 IndoCapital</h2>
+    <h2>Selamat Datang 👋</h2>
+    <div class="saldo">Saldo: <span id="saldoText">Rp 0</span></div>
 
-    <div class="user-box">
-      <p id="nama">Memuat nama...</p>
-      <p id="email">Memuat email...</p>
-    </div>
+    <button onclick="location.href='profile.html'" class="btn-secondary">👤 Profil</button>
+    <button onclick="location.href='deposit.html'" class="btn-primary">➕ Deposit</button>
+    <button onclick="location.href='withdraw.html'" class="btn-primary">💸 Withdraw</button>
+    <button onclick="location.href='riwayat.html'" class="btn-outline">📑 Riwayat Transaksi</button>
+    <button onclick="location.href='investasi.html'" class="btn-outline">📈 Investasi</button>
 
-    <div class="saldo" id="saldoBox">Saldo: Rp 0</div>
-
-    <div class="buttons">
-      <button onclick="window.location.href='profil.html'">👤 Profil</button>
-      <button onclick="window.location.href='deposit.html'">💳 Deposit</button>
-      <button onclick="window.location.href='withdraw.html'">📤 Withdraw</button>
-      <button onclick="window.location.href='riwayat.html'">📄 Riwayat Transaksi</button>
-      <button class="logout" onclick="logout()">🚪 Logout</button>
-    </div>
-
-    <div class="footer">© 2025 IndoCapital</div>
+    <button onclick="logout()" class="btn-secondary">🚪 Logout</button>
+    <div class="status" id="statusMsg"></div>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const { auth, db, doc, getDoc, signOut, onAuthStateChanged } = firebaseObj;
 
-    const namaEl = document.getElementById('nama');
-    const emailEl = document.getElementById('email');
-    const saldoBox = document.getElementById('saldoBox');
+    const saldoText = document.getElementById('saldoText');
+    const statusMsg = document.getElementById('statusMsg');
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = 'index.html';
-
-      try {
+      if (user) {
         const userRef = doc(db, 'users', user.uid);
         const snap = await getDoc(userRef);
-
-        if (!snap.exists()) {
-          namaEl.innerText = 'Pengguna tidak ditemukan';
-          return;
+        if (snap.exists()) {
+          const data = snap.data();
+          saldoText.innerText = 'Rp ' + (data.saldo || 0).toLocaleString();
+        } else {
+          statusMsg.textContent = '❌ Data pengguna tidak ditemukan.';
         }
-
-        const data = snap.data();
-        namaEl.innerText = data.nama || 'Tanpa Nama';
-        emailEl.innerText = data.email || user.email;
-        saldoBox.innerText = 'Saldo: Rp ' + (data.saldo || 0).toLocaleString('id-ID');
-      } catch (e) {
-        namaEl.innerText = 'Gagal memuat data pengguna';
-        console.error(e);
+      } else {
+        location.href = 'index.html';
       }
     });
 
-    window.logout = async function () {
+    window.logout = async () => {
       await signOut(auth);
-      window.location.href = 'index.html';
+      location.href = 'index.html';
     };
   </script>
 </body>
-    </html>
-    
+</html>
