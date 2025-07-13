@@ -1,4 +1,4 @@
-// File: api/ipaymu-notify.js (untuk Vercel / Express backend)
+// File: api/ipaymu-notify.js (untuk Vercel / webhook IPAYMU)
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, updateDoc, Timestamp } from "firebase/firestore";
@@ -18,10 +18,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const data = req.body;
+    // 🛡 Pastikan data terbaca meski tidak auto-parsed
+    let data = req.body;
+    if (!data || Object.keys(data).length === 0) {
+      const buffers = [];
+
+      for await (const chunk of req) {
+        buffers.push(chunk);
+      }
+
+      const rawBody = Buffer.concat(buffers).toString();
+      data = JSON.parse(rawBody);
+    }
 
     const status = data.status;
-    const referenceId = data.reference_id; // Contoh: 'DEPOSIT-20250712190000'
+    const referenceId = data.reference_id;
 
     if (status == 1 && referenceId) {
       const depositRef = doc(db, 'deposit', referenceId);
