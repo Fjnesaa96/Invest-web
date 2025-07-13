@@ -82,15 +82,20 @@
     <label for="metode">Metode Penarikan</label>
     <select id="metode" required>
       <option value="">Pilih metode</option>
-      <option value="Bank">Bank Transfer</option>
+      <option value="Bank">Bank</option>
       <option value="Ewallet">E-wallet</option>
+    </select>
+
+    <label for="provider">Pilih Bank / E-wallet</label>
+    <select id="provider" required>
+      <option value="">Pilih jenis</option>
     </select>
 
     <label for="jumlah">Jumlah Penarikan (Rp)</label>
     <input type="number" id="jumlah" min="50000" required />
 
-    <label for="rekening">Rekening Tujuan</label>
-    <input type="text" id="rekening" placeholder="Contoh: BCA - 1234567890 a.n. Nama" />
+    <label for="rekening">Nomor Rekening / E-wallet Tujuan</label>
+    <input type="text" id="rekening" placeholder="Contoh: 1234567890" />
 
     <button id="kirim">Kirim Penarikan</button>
     <div id="msg"></div>
@@ -101,20 +106,32 @@
     const { auth, db, doc, getDoc, updateDoc, addDoc, collection, Timestamp, onAuthStateChanged } = firebaseObj;
 
     const metodeEl = document.getElementById('metode');
+    const providerEl = document.getElementById('provider');
     const jumlahEl = document.getElementById('jumlah');
     const rekeningEl = document.getElementById('rekening');
     const msg = document.getElementById('msg');
     const saldoSpan = document.getElementById('saldo');
 
+    const bankList = ["BCA", "BRI", "BNI", "Mandiri", "CIMB", "Danamon", "BTN"];
+    const ewalletList = ["Dana", "OVO", "GoPay", "ShopeePay", "LinkAja"];
+
     let currentUser;
     let saldo = 0;
     let userData = null;
 
+    metodeEl.addEventListener('change', () => {
+      providerEl.innerHTML = '<option value="">Pilih jenis</option>';
+      const list = metodeEl.value === "Bank" ? bankList : ewalletList;
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        providerEl.appendChild(opt);
+      });
+    });
+
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
+      if (!user) return window.location.href = 'index.html';
       currentUser = user;
       const docRef = doc(db, 'users', user.uid);
       const snap = await getDoc(docRef);
@@ -128,10 +145,11 @@
 
     document.getElementById('kirim').addEventListener('click', async () => {
       const metode = metodeEl.value;
+      const provider = providerEl.value;
       const jumlah = parseInt(jumlahEl.value);
       const rekening = rekeningEl.value.trim();
 
-      if (!metode || !jumlah || !rekening) {
+      if (!metode || !provider || !jumlah || !rekening) {
         msg.innerHTML = '<p class="error">Semua kolom wajib diisi.</p>';
         return;
       }
@@ -145,15 +163,15 @@
       const total = jumlah + (jumlah * fee);
 
       if (total > saldo) {
-        msg.innerHTML = '<p class="error">Saldo tidak cukup. Total termasuk fee: Rp ' + total.toLocaleString('id-ID') + '</p>';
+        msg.innerHTML = `<p class="error">Saldo tidak cukup. Total termasuk fee: Rp ${total.toLocaleString('id-ID')}</p>`;
         return;
       }
 
-      // Batas perubahan rekening
+      // Maksimal ubah rekening 3 kali
       if (rekening !== (userData.rekening || '')) {
         const count = userData.rekeningChanges || 0;
         if (count >= 3) {
-          msg.innerHTML = '<p class="error">Maksimal perubahan rekening sudah tercapai (3x).</p>';
+          msg.innerHTML = '<p class="error">Maksimal perubahan rekening sudah 3x.</p>';
           return;
         }
         await updateDoc(doc(db, 'users', currentUser.uid), {
@@ -167,6 +185,7 @@
         email: currentUser.email,
         jumlah,
         metode,
+        provider,
         rekening,
         fee: fee,
         total: total,
