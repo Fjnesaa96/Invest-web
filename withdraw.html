@@ -3,58 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Penarikan Dana - IndoCapital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Withdraw Dana | IndoCapital</title>
   <script type="module" src="firebase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f4f9ff;
-      padding: 30px;
+      margin: 0;
+      padding: 20px;
+      background: #f1f5ff;
+      color: #333;
     }
     .container {
-      max-width: 500px;
+      max-width: 450px;
       margin: auto;
       background: white;
-      padding: 30px;
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
-      color: #007BFF;
-      margin-bottom: 20px;
+      color: #2e7df6;
     }
     label {
-      font-weight: 600;
+      margin-top: 10px;
       display: block;
-      margin-top: 15px;
+      font-weight: 600;
     }
-    input {
+    input, select {
       width: 100%;
-      padding: 12px;
-      margin-top: 5px;
+      padding: 10px;
+      margin-top: 6px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-bottom: 15px;
+      box-sizing: border-box;
     }
     button {
       width: 100%;
-      padding: 14px;
-      background-color: #28a745;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #2e7df6;
+      border: none;
       color: white;
       font-weight: bold;
-      border: none;
       border-radius: 8px;
       cursor: pointer;
+    }
+    button:hover {
+      background-color: #216ad7;
+    }
+    .info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+    #backBtn {
+      background-color: #999;
       margin-top: 10px;
     }
-    .info, .success, .error {
+    #msg {
+      margin-top: 10px;
       font-size: 14px;
       text-align: center;
-      margin-top: 10px;
     }
-    .info { color: #555; }
     .success { color: green; }
     .error { color: red; }
   </style>
@@ -62,115 +74,110 @@
 <body>
   <div class="container">
     <h2>Penarikan Dana</h2>
-    <div id="infoRekening" class="info">Memuat akun bank/ewallet Anda...</div>
-
-    <form id="withdrawForm" style="display: none;">
-      <label>Jumlah Penarikan (Rp)</label>
+    <p><strong>Saldo Tersedia:</strong> <span id="saldoDisplay">Memuat...</span></p>
+    <form id="withdrawForm">
+      <label for="jumlah">Jumlah Penarikan</label>
       <input type="number" id="jumlah" required />
 
-      <div class="info" id="biayaInfo"></div>
-      <div class="info" id="saldoInfo"></div>
-      <button type="submit">Tarik Dana</button>
-    </form>
+      <p class="info" id="feeInfo">Biaya dan jumlah diterima akan tampil di sini.</p>
 
-    <div id="msg"></div>
+      <button type="submit">Kirim Penarikan</button>
+      <button type="button" id="backBtn">Kembali ke Dashboard</button>
+      <p id="msg"></p>
+    </form>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const {
-      auth, db, doc, getDoc, collection, addDoc, Timestamp
+      auth, db, doc, getDoc, collection, addDoc, Timestamp, onAuthStateChanged
     } = firebaseObj;
 
-    const jumlahEl = document.getElementById('jumlah');
-    const form = document.getElementById('withdrawForm');
-    const infoRekening = document.getElementById('infoRekening');
-    const msg = document.getElementById('msg');
-    const biayaInfo = document.getElementById('biayaInfo');
-    const saldoInfo = document.getElementById('saldoInfo');
+    const jumlahInput = document.getElementById('jumlah');
+    const msgEl = document.getElementById('msg');
+    const feeInfo = document.getElementById('feeInfo');
+    const saldoDisplay = document.getElementById('saldoDisplay');
 
-    let userData, user;
+    let userData = null;
 
-    auth.onAuthStateChanged(async (u) => {
-      if (u) {
-        user = u;
-        const userSnap = await getDoc(doc(db, 'users', u.uid));
-        if (!userSnap.exists()) {
-          infoRekening.innerText = 'Data pengguna tidak ditemukan.';
-          return;
-        }
-        userData = userSnap.data();
-        const { bank, rekening, saldo } = userData;
+    function formatRp(nominal) {
+      return 'Rp' + nominal.toLocaleString('id-ID');
+    }
 
-        if (!bank || !rekening) {
-          infoRekening.innerHTML = '<span class="error">Anda belum menautkan akun bank atau e-wallet. Silakan update di profil.</span>';
-          return;
-        }
-
-        infoRekening.innerHTML = `
-          <strong>${bank}</strong><br>No. Rekening/HP: ${rekening}<br>Saldo tersedia: Rp${saldo.toLocaleString()}
-        `;
-        saldoInfo.innerText = `Saldo yang dapat ditarik: Rp${saldo.toLocaleString()}`;
-        form.style.display = 'block';
-
-        jumlahEl.addEventListener('input', () => {
-          const jml = parseInt(jumlahEl.value || 0);
-          let fee = 0;
-          if (['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(bank)) {
-            fee = Math.ceil(jml * 0.15);
-          } else {
-            fee = Math.ceil(jml * 0.12);
-          }
-
-          const total = jml - fee;
-          biayaInfo.innerText = `Biaya: Rp${fee.toLocaleString()} | Total diterima: Rp${total.toLocaleString()}`;
-        });
-
-      } else {
-        window.location.href = 'index.html';
-      }
+    jumlahInput.addEventListener('input', () => {
+      const jml = parseInt(jumlahInput.value || 0);
+      if (!userData) return;
+      const jenis = userData.bank || '';
+      const fee = ['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(jenis) ? Math.ceil(jml * 0.15) : Math.ceil(jml * 0.12);
+      const diterima = jml - fee;
+      feeInfo.innerText = `Biaya: ${formatRp(fee)} | Diterima: ${formatRp(diterima)}`;
     });
 
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const jumlah = parseInt(jumlahEl.value);
-      if (!jumlah || jumlah <= 0) return;
+      msgEl.innerText = '';
+      msgEl.className = '';
+      const jml = parseInt(jumlahInput.value);
+      if (!userData) return;
 
-      const isEwallet = ['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(userData.bank);
-      const min = isEwallet ? 1000 : 50000;
-      const fee = Math.ceil(jumlah * (isEwallet ? 0.15 : 0.12));
-      const after = jumlah - fee;
+      const jenis = userData.bank;
+      const min = ['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(jenis) ? 1000 : 50000;
 
-      if (jumlah < min) {
-        msg.innerHTML = `<p class="error">Minimal penarikan untuk ${userData.bank} adalah Rp${min.toLocaleString()}.</p>`;
+      if (jml < min) {
+        msgEl.innerText = `Minimal penarikan untuk ${jenis} adalah ${formatRp(min)}`;
+        msgEl.className = 'error';
         return;
       }
 
-      if (jumlah > userData.saldo) {
-        msg.innerHTML = '<p class="error">Saldo Anda tidak mencukupi.</p>';
+      if (jml > userData.saldo) {
+        msgEl.innerText = 'Saldo tidak mencukupi.';
+        msgEl.className = 'error';
         return;
       }
+
+      const fee = ['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(jenis) ? Math.ceil(jml * 0.15) : Math.ceil(jml * 0.12);
+      const diterima = jml - fee;
 
       try {
         await addDoc(collection(db, 'withdraw'), {
-          userId: user.uid,
-          nama: userData.nama,
+          userId: auth.currentUser.uid,
           email: userData.email,
+          nama: userData.nama,
           bank: userData.bank,
           rekening: userData.rekening,
-          nominal: jumlah,
-          fee: fee,
-          diterima: after,
+          nominal: jml,
+          fee,
+          diterima,
           status: 'pending',
           createdAt: Timestamp.now()
         });
 
-        msg.innerHTML = '<p class="success">Permintaan penarikan berhasil dikirim.</p>';
-        form.reset();
-        biayaInfo.innerText = '';
+        msgEl.innerText = 'Penarikan berhasil dikirim!';
+        msgEl.className = 'success';
+        jumlahInput.value = '';
+        feeInfo.innerText = '';
       } catch (err) {
+        msgEl.innerText = 'Gagal mengirim penarikan.';
+        msgEl.className = 'error';
         console.error(err);
-        msg.innerHTML = '<p class="error">Gagal mengirim penarikan.</p>';
+      }
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          userData = snap.data();
+          saldoDisplay.innerText = formatRp(userData.saldo);
+        } else {
+          saldoDisplay.innerText = 'Tidak ditemukan';
+        }
+      } else {
+        window.location.href = 'index.html';
       }
     });
   </script>
