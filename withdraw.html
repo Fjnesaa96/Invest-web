@@ -3,138 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Withdraw Dana - IndoCapital</title>
+  <title>Withdraw | IndoCapital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5faff;
+      margin: 0;
       padding: 20px;
+    }
+    .container {
       max-width: 500px;
+      background: white;
+      padding: 30px;
       margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     }
     h2 {
       text-align: center;
+      color: #007BFF;
     }
     label {
+      margin-top: 15px;
       display: block;
-      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #444;
     }
     input, select {
       width: 100%;
       padding: 10px;
-      margin-bottom: 15px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
-    #submitBtn {
-      padding: 10px;
-      background-color: #e67e22;
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-top: 20px;
       cursor: pointer;
     }
-    .success, .error {
+    .status {
       text-align: center;
       margin-top: 15px;
+      font-weight: bold;
     }
     .success { color: green; }
     .error { color: red; }
   </style>
 </head>
 <body>
-  <h2>Withdraw Dana</h2>
-  <form id="withdrawForm">
-    <label for="nominal">Nominal Penarikan (Rp)</label>
-    <input type="number" id="nominal" required />
+  <div class="container">
+    <h2>Penarikan Dana</h2>
+    <form id="withdrawForm">
+      <label for="nominal">Nominal Withdraw (Rp)</label>
+      <input type="number" id="nominal" required min="10000"/>
 
-    <label for="metode">Metode Penarikan</label>
-    <select id="metode" required>
-      <option value="">Pilih</option>
-      <option value="Bank">Transfer Bank</option>
-      <option value="Ewallet">E-Wallet (DANA, OVO, GoPay)</option>
-    </select>
-
-    <div id="bankSection">
-      <label for="bank">Bank Tujuan</label>
-      <select id="bank">
-        <option value="">Pilih</option>
-        <option value="BCA">BCA</option>
-        <option value="BNI">BNI</option>
-        <option value="BRI">BRI</option>
-        <option value="Mandiri">Mandiri</option>
-      </select>
-    </div>
-
-    <div id="ewalletSection" style="display: none;">
-      <label for="ewallet">Jenis E-Wallet</label>
-      <select id="ewallet">
+      <label for="metode">Metode Penarikan</label>
+      <select id="metode" required>
         <option value="">Pilih</option>
         <option value="DANA">DANA</option>
         <option value="OVO">OVO</option>
-        <option value="GoPay">GoPay</option>
+        <option value="Bank">Transfer Bank</option>
+        <option value="Gopay">Gopay</option>
       </select>
-    </div>
 
-    <label for="rekening">Nomor Rekening / Nomor HP E-Wallet</label>
-    <input type="text" id="rekening" required />
+      <label for="rekening">Nomor Akun / Rekening</label>
+      <input type="text" id="rekening" required/>
 
-    <button type="submit" id="submitBtn">Kirim Withdraw</button>
-    <div id="statusMsg"></div>
-  </form>
+      <button type="submit">Kirim Withdraw</button>
+      <div class="status" id="statusMsg"></div>
+    </form>
+  </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, collection, addDoc, Timestamp } = firebaseObj;
+    const { auth, db, doc, getDoc, updateDoc, collection, addDoc, Timestamp } = firebaseObj;
 
     const form = document.getElementById('withdrawForm');
     const statusMsg = document.getElementById('statusMsg');
-    const metodeSelect = document.getElementById('metode');
-    const bankSection = document.getElementById('bankSection');
-    const ewalletSection = document.getElementById('ewalletSection');
 
-    metodeSelect.addEventListener('change', () => {
-      const metode = metodeSelect.value;
-      bankSection.style.display = metode === 'Bank' ? 'block' : 'none';
-      ewalletSection.style.display = metode === 'Ewallet' ? 'block' : 'none';
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("Anda belum login.");
+        window.location.href = "index.html";
+      }
     });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      statusMsg.textContent = "";
+
       const nominal = parseInt(document.getElementById('nominal').value);
       const metode = document.getElementById('metode').value;
-      const bank = document.getElementById('bank').value;
-      const ewallet = document.getElementById('ewallet').value;
       const rekening = document.getElementById('rekening').value;
 
       const user = auth.currentUser;
-      if (!user) {
-        statusMsg.innerHTML = '<p class="error">Anda belum login.</p>';
-        return;
-      }
-
-      if (nominal <= 0 || !metode || !rekening) {
-        statusMsg.innerHTML = '<p class="error">Mohon lengkapi semua field.</p>';
-        return;
-      }
+      if (!user) return;
 
       try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          statusMsg.innerHTML = "<span class='error'>Data pengguna tidak ditemukan.</span>";
+          return;
+        }
+
+        const userData = userSnap.data();
+        if (userData.saldo < nominal) {
+          statusMsg.innerHTML = "<span class='error'>Saldo tidak mencukupi.</span>";
+          return;
+        }
+
+        // Catat withdraw ke Firestore
         await addDoc(collection(db, 'withdraw'), {
           userId: user.uid,
           email: user.email,
           nominal,
           metode,
-          bank: metode === 'Bank' ? bank : '',
-          ewallet: metode === 'Ewallet' ? ewallet : '',
           rekening,
-          status: 'pending',
+          status: "pending",
           createdAt: Timestamp.now()
         });
-        statusMsg.innerHTML = '<p class="success">Permintaan withdraw dikirim!</p>';
+
+        // Kurangi saldo pengguna
+        await updateDoc(userRef, {
+          saldo: userData.saldo - nominal
+        });
+
+        statusMsg.innerHTML = "<span class='success'>Permintaan withdraw berhasil dikirim.</span>";
         form.reset();
-        bankSection.style.display = 'block';
-        ewalletSection.style.display = 'none';
       } catch (err) {
         console.error(err);
-        statusMsg.innerHTML = '<p class="error">Gagal mengirim withdraw.</p>';
+        statusMsg.innerHTML = "<span class='error'>Gagal memproses withdraw.</span>";
       }
     });
   </script>
