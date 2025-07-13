@@ -1,124 +1,120 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | IndoCapital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Poppins', sans-serif;
+      background-color: #f4f7fc;
       margin: 0;
-      background-color: #f2f7ff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      padding: 25px;
+    }
+    h2 {
+      text-align: center;
+      color: #2e7df6;
+      margin-bottom: 10px;
+    }
+    .user-info {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .user-info p {
+      margin: 5px 0;
+      font-size: 16px;
       color: #333;
     }
-    header {
-      background: linear-gradient(to right, #0052d4, #4364f7);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      border-bottom-left-radius: 30px;
-      border-bottom-right-radius: 30px;
-    }
-    header h2 {
-      margin: 10px 0;
-    }
-    .saldo-card {
-      background: white;
-      margin: -50px auto 20px;
-      width: 90%;
-      border-radius: 16px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      padding: 20px;
-      text-align: center;
-      animation: fadeIn 1s ease;
-    }
-    .saldo-card h3 {
-      margin: 0;
-      color: #555;
-    }
     .saldo {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 10px;
-      color: #007bff;
-    }
-    .menu {
-      display: flex;
-      justify-content: space-around;
-      padding: 20px 10px;
-    }
-    .menu button {
-      background-color: white;
-      border: 2px solid #007bff;
-      color: #007bff;
-      padding: 10px 15px;
+      background-color: #e6f0ff;
+      padding: 15px;
       border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .menu button:hover {
-      background-color: #007bff;
-      color: white;
-    }
-    .footer {
       text-align: center;
-      margin-top: 30px;
-      font-size: 14px;
-      color: #aaa;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2e7df6;
+      margin-bottom: 30px;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    .dashboard-buttons button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      background-color: #2e7df6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .dashboard-buttons button:hover {
+      background-color: #1a5fd1;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Selamat Datang</h2>
-    <div id="namaPengguna">Memuat...</div>
-  </header>
+  <div class="container">
+    <h2>IndoCapital</h2>
+    <div class="user-info">
+      <p id="nama">Memuat nama...</p>
+      <p id="email">Memuat email...</p>
+    </div>
+    <div class="saldo" id="saldoBox">Saldo: Rp 0</div>
 
-  <div class="saldo-card">
-    <h3>Saldo Anda</h3>
-    <div class="saldo" id="saldo">Rp 0</div>
+    <div class="dashboard-buttons">
+      <button onclick="window.location.href='profil.html'">👤 Profil</button>
+      <button onclick="window.location.href='deposit.html'">💰 Deposit</button>
+      <button onclick="window.location.href='withdraw.html'">📤 Withdraw</button>
+      <button onclick="window.location.href='riwayat.html'">📄 Riwayat Transaksi</button>
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
   </div>
-
-  <div class="menu">
-    <button onclick="window.location.href='profile.html'">Profil</button>
-    <button onclick="window.location.href='deposit.html'">Deposit</button>
-    <button onclick="window.location.href='withdraw.html'">Withdraw</button>
-  </div>
-
-  <div class="footer">© IndoCapital 2025</div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, doc, getDoc, onAuthStateChanged, signOut } = firebaseObj;
+    const { auth, db, doc, getDoc, signOut, onAuthStateChanged } = firebaseObj;
 
-    const namaEl = document.getElementById('namaPengguna');
-    const saldoEl = document.getElementById('saldo');
+    const namaEl = document.getElementById('nama');
+    const emailEl = document.getElementById('email');
+    const saldoBox = document.getElementById('saldoBox');
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
+      if (!user) return window.location.href = 'index.html';
+
+      try {
         const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          namaEl.innerText = data.nama || user.email;
-          saldoEl.innerText = `Rp ${data.saldo.toLocaleString('id-ID')}`;
-        } else {
-          namaEl.innerText = 'Data tidak ditemukan';
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) {
+          namaEl.innerText = 'Data pengguna tidak ditemukan';
+          return;
         }
-      } else {
-        window.location.href = 'index.html';
+
+        const data = snap.data();
+        namaEl.innerText = data.nama || 'Tanpa Nama';
+        emailEl.innerText = data.email || user.email;
+        saldoBox.innerText = 'Saldo: Rp ' + (data.saldo || 0).toLocaleString('id-ID');
+      } catch (e) {
+        namaEl.innerText = 'Gagal memuat data pengguna';
+        console.error(e);
       }
     });
+
+    window.logout = async function () {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
   </script>
 </body>
 </html>
