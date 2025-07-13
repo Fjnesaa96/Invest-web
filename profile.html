@@ -3,27 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil Pengguna - IndoCapital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Profil | IndoCapital</title>
   <script type="module" src="firebase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f3f6fc;
-      padding: 30px;
+      background: #f5f7fc;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark {
+      background: #121212;
+      color: #f0f0f0;
     }
     .container {
-      max-width: 500px;
+      max-width: 480px;
       margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      background: #fff;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    .dark .container {
+      background: #1e1e1e;
     }
     h2 {
       text-align: center;
-      color: #007BFF;
-      margin-bottom: 20px;
+      color: #2e7df6;
+    }
+    .avatar {
+      display: block;
+      margin: 0 auto 20px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #2e7df6;
     }
     label {
       font-weight: 600;
@@ -34,152 +52,154 @@
       width: 100%;
       padding: 12px;
       margin-top: 5px;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      background: #fff;
     }
     button {
       width: 100%;
-      padding: 14px;
-      background-color: #007BFF;
-      color: white;
-      font-weight: bold;
+      padding: 12px;
+      margin-top: 20px;
       border: none;
       border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
     }
-    .btn-secondary {
-      background-color: #6c757d;
-    }
-    .success, .error, .info {
-      text-align: center;
-      font-size: 14px;
-      margin-top: 10px;
-    }
+    .saveBtn { background: #2e7df6; color: white; }
+    .logoutBtn { background: #ddd; color: #333; }
+    .backBtn { background: #f0f0f0; }
+    .toggleDark { background: #444; color: #fff; margin-top: 10px; }
+    .status { margin-top: 10px; font-size: 0.9em; }
     .success { color: green; }
     .error { color: red; }
-    .info { color: #555; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Profil Pengguna</h2>
-    <form id="profilForm">
-      <label>Email (tidak dapat diubah)</label>
-      <input type="email" id="email" disabled />
+    <h2>👤 Profil Pengguna</h2>
+    <img src="https://via.placeholder.com/90" alt="Avatar" id="avatarPreview" class="avatar" />
+    <input type="file" id="avatarInput" accept="image/*" />
 
-      <label>Nama Lengkap</label>
+    <p><strong>Saldo Saat Ini:</strong> <span id="saldoText">Rp 0</span></p>
+
+    <form id="profileForm">
+      <label for="nama">Nama Lengkap</label>
       <input type="text" id="nama" required />
 
-      <label>Bank / E-Wallet</label>
-      <select id="jenisAkun" required>
-        <option value="">Pilih</option>
+      <label for="email">Email</label>
+      <input type="email" id="email" disabled />
+
+      <label for="bank">Bank / E-wallet</label>
+      <select id="bank">
+        <option value="">Pilih...</option>
         <option value="BCA">BCA</option>
-        <option value="BRI">BRI</option>
         <option value="BNI">BNI</option>
+        <option value="BRI">BRI</option>
         <option value="Mandiri">Mandiri</option>
-        <option value="BSI">BSI</option>
-        <option value="CIMB Niaga">CIMB Niaga</option>
         <option value="Dana">Dana</option>
         <option value="OVO">OVO</option>
-        <option value="GoPay">GoPay</option>
         <option value="ShopeePay">ShopeePay</option>
-        <option value="LinkAja">LinkAja</option>
+        <option value="Gopay">GoPay</option>
       </select>
 
-      <label>No. Rekening / No. HP</label>
-      <input type="text" id="noRek" required />
+      <label for="rekening">No Rekening / No HP</label>
+      <input type="text" id="rekening" placeholder="Masukkan nomor rekening atau ewallet"/>
 
-      <button type="submit">Simpan Perubahan</button>
+      <label for="ktp">Unggah KTP (opsional)</label>
+      <input type="file" id="ktp" accept="image/*" />
+
+      <div class="status" id="statusInfo"></div>
+      <button type="submit" class="saveBtn">💾 Simpan Perubahan</button>
     </form>
 
-    <div class="info">Batas ubah akun maks. 3x</div>
-    <div id="msg"></div>
-
-    <button id="backDashboard" class="btn-secondary">⬅ Kembali ke Dashboard</button>
-    <button id="logout" class="btn-secondary">🔓 Logout</button>
+    <button onclick="window.location.href='dashboard.html'" class="backBtn">⬅️ Kembali ke Dashboard</button>
+    <button onclick="logout()" class="logoutBtn">🚪 Logout</button>
+    <button onclick="toggleDarkMode()" class="toggleDark">🌓 Mode Gelap / Terang</button>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const {
-      auth, db, doc, getDoc, updateDoc, signOut
-    } = firebaseObj;
+    const { auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut, storage, ref, uploadBytes, getDownloadURL } = firebaseObj;
 
-    const form = document.getElementById('profilForm');
-    const msg = document.getElementById('msg');
-    let user, changeCount = 0;
+    const namaInput = document.getElementById('nama');
+    const emailInput = document.getElementById('email');
+    const bankInput = document.getElementById('bank');
+    const rekeningInput = document.getElementById('rekening');
+    const saldoText = document.getElementById('saldoText');
+    const statusInfo = document.getElementById('statusInfo');
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const ktpInput = document.getElementById('ktp');
 
-    auth.onAuthStateChanged(async (u) => {
-      if (u) {
-        user = u;
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          document.getElementById('email').value = data.email || '';
-          document.getElementById('nama').value = data.nama || '';
-          document.getElementById('jenisAkun').value = data.bank || '';
-          document.getElementById('noRek').value = data.rekening || '';
-          changeCount = data.ubahAkunCount || 0;
-        }
-      } else {
-        window.location.href = 'index.html';
+    let userRef, rekeningChangeCount = 0;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = 'index.html';
+      userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        namaInput.value = data.nama || '';
+        emailInput.value = data.email || '';
+        bankInput.value = data.bank || '';
+        rekeningInput.value = data.rekening || '';
+        saldoText.innerText = 'Rp ' + (data.saldo || 0).toLocaleString();
+        rekeningChangeCount = data.rekeningChanges || 0;
+        if (data.avatarUrl) avatarPreview.src = data.avatarUrl;
       }
     });
 
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nama = document.getElementById('nama').value.trim();
-      const jenisAkun = document.getElementById('jenisAkun').value.trim();
-      const noRek = document.getElementById('noRek').value.trim();
-
-      if (!nama || !jenisAkun || !noRek) {
-        msg.innerHTML = '<p class="error">Semua kolom harus diisi.</p>';
-        return;
-      }
-
       try {
-        const userRef = doc(db, 'users', user.uid);
+        const updates = {
+          nama: namaInput.value,
+          bank: bankInput.value,
+        };
+
+        const rekeningBaru = rekeningInput.value;
         const snap = await getDoc(userRef);
-        const prev = snap.data();
-
-        let newCount = changeCount;
-
-        if (
-          prev.bank !== jenisAkun ||
-          prev.rekening !== noRek
-        ) {
-          newCount += 1;
-          if (newCount > 3) {
-            msg.innerHTML = '<p class="error">Anda sudah melewati batas ubah akun (3x).</p>';
-            return;
+        const data = snap.data();
+        if (data.rekening !== rekeningBaru) {
+          if (rekeningChangeCount >= 3) {
+            return statusInfo.innerHTML = '<p class="error">❌ Rekening hanya bisa diubah maksimal 3x</p>';
           }
+          updates.rekening = rekeningBaru;
+          updates.rekeningChanges = rekeningChangeCount + 1;
         }
 
-        await updateDoc(userRef, {
-          nama,
-          bank: jenisAkun,
-          rekening: noRek,
-          ubahAkunCount: newCount
-        });
+        // Upload avatar jika ada
+        if (avatarInput.files[0]) {
+          const avatarRef = ref(storage, `avatars/${auth.currentUser.uid}`);
+          await uploadBytes(avatarRef, avatarInput.files[0]);
+          const avatarUrl = await getDownloadURL(avatarRef);
+          updates.avatarUrl = avatarUrl;
+        }
 
-        msg.innerHTML = '<p class="success">Profil berhasil diperbarui.</p>';
+        // Upload KTP jika ada
+        if (ktpInput.files[0]) {
+          const ktpRef = ref(storage, `ktp/${auth.currentUser.uid}`);
+          await uploadBytes(ktpRef, ktpInput.files[0]);
+          const ktpUrl = await getDownloadURL(ktpRef);
+          updates.ktpUrl = ktpUrl;
+        }
+
+        await updateDoc(userRef, updates);
+        statusInfo.innerHTML = '<p class="success">✅ Data berhasil diperbarui!</p>';
       } catch (err) {
         console.error(err);
-        msg.innerHTML = '<p class="error">Gagal menyimpan perubahan.</p>';
+        statusInfo.innerHTML = '<p class="error">❌ Gagal menyimpan perubahan</p>';
       }
     });
 
-    document.getElementById('logout').addEventListener('click', async () => {
+    window.logout = async () => {
       await signOut(auth);
       window.location.href = 'index.html';
-    });
+    };
 
-    document.getElementById('backDashboard').addEventListener('click', () => {
-      window.location.href = 'dashboard.html';
-    });
+    window.toggleDarkMode = () => {
+      document.body.classList.toggle('dark');
+    };
   </script>
 </body>
 </html>
