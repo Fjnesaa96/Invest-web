@@ -60,9 +60,9 @@
   <div class="register-container">
     <h2>Daftar IndoCapital</h2>
     <form id="registerForm">
-      <input type="text" placeholder="Nama Lengkap" required />
-      <input type="email" placeholder="Email" required />
-      <input type="password" placeholder="Kata Sandi" required />
+      <input type="text" id="nama" placeholder="Nama Lengkap" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Kata Sandi" required />
       <button type="submit">Daftar</button>
     </form>
     <div class="link">
@@ -72,15 +72,23 @@
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, createUserWithEmailAndPassword, setDoc, doc } = firebaseObj;
+    const {
+      auth,
+      db,
+      createUserWithEmailAndPassword,
+      setDoc,
+      doc,
+      Timestamp // ⬅️ Tambahkan ini!
+    } = firebaseObj;
 
     const form = document.getElementById('registerForm');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const nama = form.querySelector('input[placeholder="Nama Lengkap"]').value;
-      const email = form.querySelector('input[placeholder="Email"]').value;
-      const password = form.querySelector('input[placeholder="Kata Sandi"]').value;
+      const nama = document.getElementById('nama').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -90,13 +98,14 @@
           nama: nama,
           email: email,
           saldo: 0,
-          createdAt: new Date()
+          createdAt: Timestamp.now()
         });
 
         alert('Registrasi berhasil!');
         window.location.href = 'index.html';
       } catch (error) {
         alert('Gagal registrasi: ' + error.message);
+        console.error(error);
       }
     });
   </script>
