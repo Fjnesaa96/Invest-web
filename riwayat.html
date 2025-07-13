@@ -3,126 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Riwayat Transaksi | IndoCapital</title>
+  <title>Riwayat Transaksi - IndoCapital</title>
   <script type="module" src="firebase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f2f6fc;
+      background: #f5f9ff;
       margin: 0;
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 480px;
       margin: auto;
-      background: white;
+      background: #fff;
       padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
     }
     h2 {
-      color: #2e7df6;
       text-align: center;
+      color: #2e7df6;
       margin-bottom: 20px;
     }
-    .entry {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+    .tx-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
-    .entry:last-child {
-      border-bottom: none;
+    .tx-item {
+      border-left: 5px solid #ccc;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      background: #f1f7ff;
+      border-radius: 6px;
     }
-    .entry strong {
-      display: block;
+    .tx-item.deposit { border-color: #2ecc71; }
+    .tx-item.withdraw { border-color: #f39c12; }
+    .tx-item h4 {
+      margin: 0;
       font-size: 16px;
     }
-    .entry span {
+    .tx-item p {
+      margin: 5px 0 0;
       font-size: 14px;
-      color: #666;
+      color: #555;
     }
-    .status {
-      float: right;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .approved { color: green; }
-    .pending { color: orange; }
-    .failed { color: red; }
-    button {
+    .back-btn {
       margin-top: 20px;
-      padding: 10px;
-      width: 100%;
+      text-align: center;
+    }
+    .back-btn button {
+      background: #2e7df6;
+      color: white;
+      padding: 10px 20px;
       border: none;
       border-radius: 8px;
-      background-color: #2e7df6;
-      color: white;
       font-weight: bold;
       cursor: pointer;
+    }
+    .error, .empty {
+      text-align: center;
+      color: #888;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Riwayat Transaksi</h2>
-    <div id="transaksiList">Memuat...</div>
-    <button onclick="window.location.href='dashboard.html'">Kembali ke Dashboard</button>
+    <h2>📄 Riwayat Transaksi</h2>
+    <ul class="tx-list" id="txList">
+      <p class="empty" id="emptyMsg">Memuat transaksi...</p>
+    </ul>
+    <div class="back-btn">
+      <button onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </div>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const {
-      auth, db, collection, query, where, orderBy, getDocs, onAuthStateChanged
-    } = firebaseObj;
+    const { auth, db, collection, query, where, orderBy, getDocs, onAuthStateChanged } = firebaseObj;
 
-    const transaksiList = document.getElementById('transaksiList');
+    const txList = document.getElementById('txList');
+    const emptyMsg = document.getElementById('emptyMsg');
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) return window.location.href = 'index.html';
 
-      const userId = user.uid;
-
       try {
-        const depositRef = query(collection(db, 'deposit'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
-        const withdrawRef = query(collection(db, 'withdraw'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+        const depositQuery = query(
+          collection(db, 'deposit'),
+          where('userId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
+
+        const withdrawQuery = query(
+          collection(db, 'withdraw'),
+          where('userId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
 
         const [depositSnap, withdrawSnap] = await Promise.all([
-          getDocs(depositRef),
-          getDocs(withdrawRef)
+          getDocs(depositQuery),
+          getDocs(withdrawQuery)
         ]);
 
-        let html = '';
+        const txs = [];
 
-        depositSnap.forEach(doc => {
-          const data = doc.data();
-          html += `
-            <div class="entry">
-              <strong>Deposit ${formatRp(data.nominal)}</strong>
-              <span>${data.createdAt.toDate().toLocaleString()}</span>
-              <span class="status ${data.status}">${data.status}</span>
-            </div>`;
+        depositSnap.forEach(doc => txs.push({ ...doc.data(), type: 'deposit' }));
+        withdrawSnap.forEach(doc => txs.push({ ...doc.data(), type: 'withdraw' }));
+
+        if (txs.length === 0) {
+          emptyMsg.innerText = 'Belum ada transaksi';
+          return;
+        }
+
+        // Urutkan semua berdasarkan waktu
+        txs.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
+
+        emptyMsg.style.display = 'none';
+
+        txs.forEach(tx => {
+          const li = document.createElement('li');
+          li.className = `tx-item ${tx.type}`;
+          li.innerHTML = `
+            <h4>${tx.type === 'deposit' ? '💰 Deposit' : '📤 Withdraw'} - Rp ${tx.nominal.toLocaleString('id-ID')}</h4>
+            <p>Status: ${tx.status}</p>
+            <p>Tanggal: ${tx.createdAt?.toDate().toLocaleString('id-ID')}</p>
+          `;
+          txList.appendChild(li);
         });
 
-        withdrawSnap.forEach(doc => {
-          const data = doc.data();
-          html += `
-            <div class="entry">
-              <strong>Withdraw ${formatRp(data.nominal)}</strong>
-              <span>${data.createdAt.toDate().toLocaleString()}</span>
-              <span class="status ${data.status}">${data.status}</span>
-            </div>`;
-        });
-
-        transaksiList.innerHTML = html || 'Belum ada transaksi.';
-      } catch (err) {
-        transaksiList.innerHTML = 'Gagal memuat riwayat.';
-        console.error(err);
+      } catch (e) {
+        emptyMsg.innerText = 'Gagal memuat transaksi.';
+        console.error('Riwayat error:', e);
       }
     });
-
-    function formatRp(n) {
-      return 'Rp' + n.toLocaleString('id-ID');
-    }
   </script>
 </body>
 </html>
