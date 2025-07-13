@@ -1,115 +1,108 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profil Pengguna - IndoCapital</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil | IndoCapital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f4fa;
+      margin: 0;
+    }
+    .navbar {
+      background: white;
+      padding: 15px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 {
+      font-size: 20px;
+      color: #007BFF;
+      margin: 0;
+    }
+    .logout-btn {
+      padding: 8px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .container {
       max-width: 600px;
-      margin: auto;
-      background: #f8f9fa;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     h2 {
       text-align: center;
+      margin-bottom: 30px;
+      color: #333;
     }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .info-item {
+      margin-bottom: 15px;
     }
-    label {
-      display: block;
-      margin-top: 10px;
+    .info-label {
+      font-weight: bold;
+      color: #555;
     }
-    input {
-      width: 100%;
-      padding: 10px;
+    .info-value {
       margin-top: 5px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px;
-      background: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .status {
-      margin-top: 15px;
-      text-align: center;
+      font-size: 16px;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h2>Profil Pengguna</h2>
-  <form id="profilForm">
-    <label for="nama">Nama Lengkap</label>
-    <input type="text" id="nama" required />
+  <div class="navbar">
+    <h1>Profil Investor</h1>
+    <button class="logout-btn" id="logout">Keluar</button>
+  </div>
 
-    <label for="telepon">Nomor Telepon</label>
-    <input type="text" id="telepon" required />
-
-    <label for="email">Email</label>
-    <input type="email" id="email" disabled />
-
-    <button type="submit">Perbarui Profil</button>
-    <div class="status" id="statusMsg"></div>
-  </form>
+  <div class="container">
+    <h2>Informasi Akun</h2>
+    <div class="info-item">
+      <div class="info-label">Nama Lengkap</div>
+      <div class="info-value" id="userName">Memuat...</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">Email</div>
+      <div class="info-value" id="userEmail">Memuat...</div>
+    </div>
+  </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, doc, getDoc, updateDoc } = firebaseObj;
-
-    const form = document.getElementById('profilForm');
-    const statusMsg = document.getElementById('statusMsg');
+    const { auth, db, doc, getDoc, signOut } = firebaseObj;
 
     auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      try {
+      if (user) {
         const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
           const data = userSnap.data();
-          document.getElementById('nama').value = data.nama || '';
-          document.getElementById('telepon').value = data.telepon || '';
-          document.getElementById('email').value = data.email || user.email;
+          document.getElementById('userName').innerText = data.nama || '-';
+          document.getElementById('userEmail').innerText = data.email || '-';
         } else {
-          statusMsg.innerText = 'Data profil tidak ditemukan.';
+          document.getElementById('userName').innerText = 'Data tidak ditemukan';
+          document.getElementById('userEmail').innerText = '-';
         }
-      } catch (err) {
-        console.error(err);
-        statusMsg.innerText = 'Gagal memuat data profil.';
+      } else {
+        window.location.href = 'index.html';
       }
     });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const nama = document.getElementById('nama').value;
-      const telepon = document.getElementById('telepon').value;
-
-      try {
-        const user = auth.currentUser;
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, {
-          nama,
-          telepon
-        });
-        statusMsg.innerText = 'Profil berhasil diperbarui!';
-      } catch (err) {
-        console.error(err);
-        statusMsg.innerText = 'Gagal memperbarui profil.';
-      }
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
     });
   </script>
 </body>
