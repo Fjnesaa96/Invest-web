@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar | IndoCapital</title>
+  <script type="module" src="firebase.js"></script>
+</head>
+<body>
+  <h2>Daftar IndoCapital</h2>
+  <form id="registerForm">
+    <input type="text" placeholder="Nama Lengkap" required />
+    <input type="email" placeholder="Email" required />
+    <input type="password" placeholder="Kata Sandi" required />
+    <button type="submit">Daftar</button>
+  </form>
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, db, createUserWithEmailAndPassword, setDoc, doc } = firebaseObj;
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nama = form.querySelector('input[placeholder="Nama Lengkap"]').value;
+      const email = form.querySelector('input[placeholder="Email"]').value;
+      const password = form.querySelector('input[placeholder="Kata Sandi"]').value;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, 'users', user.uid), {
+          nama: nama,
+          email: email,
+          saldo: 0,
+          createdAt: new Date()
+        });
+        alert('Registrasi berhasil!');
+        window.location.href = 'index.html';
+      } catch (error) {
+        alert('Gagal registrasi: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
