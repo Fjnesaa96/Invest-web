@@ -40,6 +40,7 @@ export const firebaseObj = {
   getDoc,
   getDocs,
   doc,
+  setDoc,
   updateDoc,
   query,
   where,
