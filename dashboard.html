@@ -2,20 +2,20 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard | IndoCapital</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-color: #007BFF;
-      --secondary-color: #0056b3;
-      --light-bg: #f0f4fa;
+      --bg: #f0f4fa;
+      --card-bg: white;
       --border-radius: 12px;
     }
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background-color: var(--light-bg);
+      background-color: var(--bg);
     }
     .navbar {
       background-color: white;
@@ -48,7 +48,7 @@
     }
     .card {
       padding: 20px;
-      background-color: #ffffff;
+      background-color: var(--card-bg);
       border-radius: var(--border-radius);
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       margin-bottom: 20px;
@@ -62,6 +62,7 @@
       color: #555;
     }
   </style>
+  <script type="module" src="firebase.js"></script>
 </head>
 <body>
   <div class="navbar">
@@ -88,14 +89,25 @@
     import { firebaseObj } from './firebase.js';
     const { auth, db, doc, getDoc, signOut } = firebaseObj;
 
+    const userInfo = document.getElementById('userInfo');
+    const balance = document.getElementById('balance');
+
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          document.getElementById('userInfo').innerText = `Email: ${userSnap.data().email}`;
-        } else {
-          document.getElementById('userInfo').innerText = 'Data pengguna tidak ditemukan.';
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            userInfo.innerText = `Nama: ${data.nama || '-'}\nEmail: ${data.email}`;
+            balance.innerText = `Rp ${data.saldo || 0}`;
+          } else {
+            userInfo.innerText = '⚠️ Data pengguna tidak ditemukan.';
+          }
+        } catch (err) {
+          console.error('Error memuat pengguna:', err);
+          userInfo.innerText = '❌ Gagal memuat data pengguna.';
         }
       } else {
         window.location.href = 'index.html';
