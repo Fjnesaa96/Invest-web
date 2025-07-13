@@ -22,11 +22,9 @@ export default async function handler(req, res) {
     let data = req.body;
     if (!data || Object.keys(data).length === 0) {
       const buffers = [];
-
       for await (const chunk of req) {
         buffers.push(chunk);
       }
-
       const rawBody = Buffer.concat(buffers).toString();
       data = JSON.parse(rawBody);
     }
