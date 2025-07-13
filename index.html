@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | IndoCapital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <title>Masuk | IndoCapital</title>
   <script type="module" src="firebase.js"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f5f9ff;
+      background-color: #eef4ff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,10 +57,10 @@
 </head>
 <body>
   <div class="login-container">
-    <h2>Masuk IndoCapital</h2>
+    <h2>Masuk ke IndoCapital</h2>
     <form id="loginForm">
-      <input type="email" placeholder="Email" required />
-      <input type="password" placeholder="Kata Sandi" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Kata Sandi" required />
       <button type="submit">Masuk</button>
     </form>
     <div class="link">
@@ -71,21 +70,22 @@
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, signInWithEmailAndPassword } = firebaseObj;
 
+    const { auth, signInWithEmailAndPassword } = firebaseObj;
     const form = document.getElementById('loginForm');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const email = form.querySelector('input[type=\"email\"]').value;
-      const password = form.querySelector('input[type=\"password\"]').value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
         alert('Login berhasil!');
         window.location.href = 'dashboard.html';
-      } catch (error) {
-        alert('Login gagal: ' + error.message);
+      } catch (err) {
+        console.error('Login gagal:', err);
+        alert('Login gagal: ' + err.message);
       }
     });
   </script>
