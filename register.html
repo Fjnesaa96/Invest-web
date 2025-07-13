@@ -72,7 +72,7 @@
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, collection, addDoc, createUserWithEmailAndPassword } = firebaseObj;
+    const { auth, db, createUserWithEmailAndPassword, setDoc, doc } = firebaseObj;
 
     const form = document.getElementById('registerForm');
     form.addEventListener('submit', async (e) => {
@@ -86,10 +86,10 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        await addDoc(collection(db, 'users'), {
-          uid: user.uid,
-          nama,
-          email,
+        await setDoc(doc(db, 'users', user.uid), {
+          nama: nama,
+          email: email,
+          saldo: 0,
           createdAt: new Date()
         });
 
