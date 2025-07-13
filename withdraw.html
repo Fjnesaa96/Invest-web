@@ -3,202 +3,188 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Withdraw | IndoCapital</title>
+  <title>Penarikan Dana - IndoCapital</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #eef4ff;
-      margin: 0;
-      padding: 0;
+      background-color: #f3f6fc;
+      padding: 30px;
     }
     .container {
       max-width: 500px;
-      margin: 40px auto;
+      margin: auto;
       background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
     h2 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #007bff;
+      color: #007BFF;
     }
     label {
       font-weight: 600;
-      display: block;
       margin-top: 15px;
+      display: block;
     }
     input, select {
       width: 100%;
       padding: 12px;
-      margin-top: 8px;
+      margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 8px;
+      margin-bottom: 15px;
     }
     button {
       width: 100%;
-      margin-top: 20px;
-      background-color: #007bff;
+      padding: 14px;
+      background-color: #007BFF;
       color: white;
-      padding: 12px;
+      font-weight: bold;
       border: none;
       border-radius: 8px;
-      font-weight: bold;
       cursor: pointer;
+      margin-top: 10px;
     }
     .info {
-      background: #f1f7ff;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
+      background: #eef5ff;
+      padding: 10px;
       font-size: 14px;
-      color: #555;
+      border-left: 4px solid #007BFF;
+      margin-bottom: 15px;
+      border-radius: 4px;
     }
-    .success {
-      color: green;
-      margin-top: 15px;
-      text-align: center;
-    }
-    .error {
-      color: red;
-      margin-top: 15px;
-      text-align: center;
-    }
+    .success { color: green; text-align: center; margin-top: 15px; }
+    .error { color: red; text-align: center; margin-top: 15px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Penarikan Dana</h2>
+    <div class="info" id="saldoInfo">Memuat saldo...</div>
+    <form id="withdrawForm">
+      <label for="jumlah">Jumlah Penarikan</label>
+      <input type="number" id="jumlah" placeholder="Contoh: 100000" required />
+
+      <label for="metode">Metode Penarikan</label>
+      <select id="metode" required>
+        <option value="">Pilih</option>
+        <option value="Bank">Transfer Bank</option>
+        <option value="E-Wallet">E-Wallet</option>
+      </select>
+
+      <label for="jenis">Jenis Bank / E-Wallet</label>
+      <select id="jenis" required>
+        <option value="">Pilih</option>
+        <option value="BCA">BCA</option>
+        <option value="BRI">BRI</option>
+        <option value="BNI">BNI</option>
+        <option value="Mandiri">Mandiri</option>
+        <option value="CIMB Niaga">CIMB Niaga</option>
+        <option value="BSI">BSI</option>
+        <option value="Dana">Dana</option>
+        <option value="OVO">OVO</option>
+        <option value="GoPay">GoPay</option>
+        <option value="ShopeePay">ShopeePay</option>
+        <option value="LinkAja">LinkAja</option>
+      </select>
+
+      <label for="rekening">Nomor Rekening / E-Wallet</label>
+      <input type="text" id="rekening" required />
+
+      <button type="submit">Kirim Permintaan</button>
+      <div id="msg"></div>
+    </form>
 
     <div class="info">
-      Minimum penarikan: <strong>Rp 50.000</strong><br>
-      Biaya penarikan: <strong>12% (Bank), 15% (E-wallet)</strong><br>
-      Saldo dapat ditarik: <span id="saldo">Rp 0</span>
+      <b>Minimum Penarikan:</b><br>
+      • Bank: Rp50.000 (Fee 12%)<br>
+      • E-Wallet: Rp1.000 (Fee 15%)<br>
+      <b>Catatan:</b> Anda hanya dapat mengganti akun tujuan maksimal 3 kali.
     </div>
-
-    <label for="metode">Metode Penarikan</label>
-    <select id="metode" required>
-      <option value="">Pilih metode</option>
-      <option value="Bank">Bank</option>
-      <option value="Ewallet">E-wallet</option>
-    </select>
-
-    <label for="provider">Pilih Bank / E-wallet</label>
-    <select id="provider" required>
-      <option value="">Pilih jenis</option>
-    </select>
-
-    <label for="jumlah">Jumlah Penarikan (Rp)</label>
-    <input type="number" id="jumlah" min="50000" required />
-
-    <label for="rekening">Nomor Rekening / E-wallet Tujuan</label>
-    <input type="text" id="rekening" placeholder="Contoh: 1234567890" />
-
-    <button id="kirim">Kirim Penarikan</button>
-    <div id="msg"></div>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
-    const { auth, db, doc, getDoc, updateDoc, addDoc, collection, Timestamp, onAuthStateChanged } = firebaseObj;
+    const {
+      auth, db, doc, getDoc, updateDoc, collection, addDoc, Timestamp
+    } = firebaseObj;
 
-    const metodeEl = document.getElementById('metode');
-    const providerEl = document.getElementById('provider');
-    const jumlahEl = document.getElementById('jumlah');
-    const rekeningEl = document.getElementById('rekening');
+    const form = document.getElementById('withdrawForm');
     const msg = document.getElementById('msg');
-    const saldoSpan = document.getElementById('saldo');
+    const saldoInfo = document.getElementById('saldoInfo');
 
-    const bankList = ["BCA", "BRI", "BNI", "Mandiri", "CIMB", "Danamon", "BTN"];
-    const ewalletList = ["Dana", "OVO", "GoPay", "ShopeePay", "LinkAja"];
+    let user, saldo = 0;
 
-    let currentUser;
-    let saldo = 0;
-    let userData = null;
-
-    metodeEl.addEventListener('change', () => {
-      providerEl.innerHTML = '<option value="">Pilih jenis</option>';
-      const list = metodeEl.value === "Bank" ? bankList : ewalletList;
-      list.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = p;
-        providerEl.appendChild(opt);
-      });
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = 'index.html';
-      currentUser = user;
-      const docRef = doc(db, 'users', user.uid);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        userData = snap.data();
-        saldo = userData.saldo || 0;
-        saldoSpan.innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
-        rekeningEl.value = userData.rekening || '';
+    auth.onAuthStateChanged(async (u) => {
+      if (u) {
+        user = u;
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          saldo = snap.data().saldo || 0;
+          saldoInfo.innerText = `Saldo tersedia: Rp ${saldo.toLocaleString('id-ID')}`;
+        } else {
+          saldoInfo.innerText = 'Data pengguna tidak ditemukan.';
+        }
+      } else {
+        window.location.href = 'index.html';
       }
     });
 
-    document.getElementById('kirim').addEventListener('click', async () => {
-      const metode = metodeEl.value;
-      const provider = providerEl.value;
-      const jumlah = parseInt(jumlahEl.value);
-      const rekening = rekeningEl.value.trim();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.innerHTML = '';
 
-      if (!metode || !provider || !jumlah || !rekening) {
+      const jumlah = parseInt(document.getElementById('jumlah').value);
+      const metode = document.getElementById('metode').value;
+      const jenis = document.getElementById('jenis').value;
+      const rekening = document.getElementById('rekening').value;
+
+      if (!metode || !jenis || !rekening || isNaN(jumlah)) {
         msg.innerHTML = '<p class="error">Semua kolom wajib diisi.</p>';
         return;
       }
 
-      if (jumlah < 50000) {
-        msg.innerHTML = '<p class="error">Minimal penarikan Rp 50.000</p>';
-        return;
-      }
-
       const fee = metode === 'Bank' ? 0.12 : 0.15;
-      const total = jumlah + (jumlah * fee);
-
-      if (total > saldo) {
-        msg.innerHTML = `<p class="error">Saldo tidak cukup. Total termasuk fee: Rp ${total.toLocaleString('id-ID')}</p>`;
+      const min = metode === 'Bank' ? 50000 : 1000;
+      if (jumlah < min) {
+        msg.innerHTML = `<p class="error">Minimal penarikan untuk ${metode} adalah Rp ${min.toLocaleString('id-ID')}</p>`;
         return;
       }
 
-      // Maksimal ubah rekening 3 kali
-      if (rekening !== (userData.rekening || '')) {
-        const count = userData.rekeningChanges || 0;
-        if (count >= 3) {
-          msg.innerHTML = '<p class="error">Maksimal perubahan rekening sudah 3x.</p>';
-          return;
-        }
-        await updateDoc(doc(db, 'users', currentUser.uid), {
-          rekening,
-          rekeningChanges: count + 1
-        });
+      const total = jumlah + jumlah * fee;
+      if (total > saldo) {
+        msg.innerHTML = `<p class="error">Saldo tidak mencukupi. Total + fee: Rp ${total.toLocaleString('id-ID')}</p>`;
+        return;
       }
 
-      await addDoc(collection(db, 'withdraw'), {
-        userId: currentUser.uid,
-        email: currentUser.email,
-        jumlah,
-        metode,
-        provider,
-        rekening,
-        fee: fee,
-        total: total,
-        status: 'pending',
-        createdAt: Timestamp.now()
-      });
+      try {
+        await addDoc(collection(db, 'withdraw'), {
+          userId: user.uid,
+          email: user.email,
+          jumlah,
+          metode,
+          jenis,
+          rekening,
+          fee: fee * 100,
+          status: 'pending',
+          createdAt: Timestamp.now()
+        });
 
-      await updateDoc(doc(db, 'users', currentUser.uid), {
-        saldo: saldo - total
-      });
+        // Kurangi saldo
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { saldo: saldo - total });
 
-      msg.innerHTML = '<p class="success">Permintaan penarikan telah dikirim!</p>';
-      jumlahEl.value = '';
+        msg.innerHTML = '<p class="success">Permintaan penarikan berhasil dikirim.</p>';
+        form.reset();
+        saldoInfo.innerText = `Saldo tersedia: Rp ${(saldo - total).toLocaleString('id-ID')}`;
+      } catch (err) {
+        console.error(err);
+        msg.innerHTML = '<p class="error">Gagal mengirim penarikan.</p>';
+      }
     });
   </script>
 </body>
