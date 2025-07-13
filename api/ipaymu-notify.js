@@ -6,7 +6,7 @@ import { getFirestore, doc, updateDoc, Timestamp } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: "AIzaSyCyXfGd92WDVlKapqTtfUAlElfwICxjzNc",
   authDomain: "indocapital-21d1f.firebaseapp.com",
-  projectId: "434461925094"
+  projectId: "indocapital-21d1f"
 };
 
 const app = initializeApp(firebaseConfig);
