@@ -1,42 +1,130 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar | IndoCapital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom right, #007bff, #00c6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .register-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.8s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.2);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Daftar IndoCapital</h2>
-  <form id="registerForm">
-    <input type="text" placeholder="Nama Lengkap" required />
-    <input type="email" placeholder="Email" required />
-    <input type="password" placeholder="Kata Sandi" required />
-    <button type="submit">Daftar</button>
-  </form>
+  <div class="register-container">
+    <h2>Daftar IndoCapital</h2>
+    <form id="registerForm">
+      <input type="text" placeholder="Nama Lengkap" required />
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Kata Sandi" required />
+      <button type="submit">Daftar</button>
+    </form>
+    <div class="link">
+      Sudah punya akun? <a href="index.html">Masuk</a>
+    </div>
+  </div>
+
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const { auth, db, createUserWithEmailAndPassword, setDoc, doc } = firebaseObj;
+
     const form = document.getElementById('registerForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nama = form.querySelector('input[placeholder="Nama Lengkap"]').value;
-      const email = form.querySelector('input[placeholder="Email"]').value;
+
+      const nama = form.querySelector('input[placeholder="Nama Lengkap"]').value.trim();
+      const email = form.querySelector('input[placeholder="Email"]').value.trim();
       const password = form.querySelector('input[placeholder="Kata Sandi"]').value;
+
+      if (!nama || !email || !password) {
+        Swal.fire('Gagal', 'Semua field wajib diisi', 'error');
+        return;
+      }
+
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
         await setDoc(doc(db, 'users', user.uid), {
-          nama: nama,
-          email: email,
+          nama,
+          email,
           saldo: 0,
           createdAt: new Date()
         });
-        alert('Registrasi berhasil!');
-        window.location.href = 'index.html';
+
+        Swal.fire({
+          title: 'Registrasi Berhasil!',
+          text: 'Anda akan diarahkan ke halaman login.',
+          icon: 'success',
+          confirmButtonText: 'Lanjut'
+        }).then(() => {
+          window.location.href = 'index.html';
+        });
+
       } catch (error) {
-        alert('Gagal registrasi: ' + error.message);
+        Swal.fire('Gagal Registrasi', error.message, 'error');
       }
     });
   </script>
