@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Withdraw | IndoCapital</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
@@ -56,6 +56,18 @@
     }
     .success { color: green; }
     .error { color: red; }
+    .fee-info {
+      background: #f2f6ff;
+      border: 1px solid #dbe8ff;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #333;
+    }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -63,19 +75,26 @@
     <h2>Penarikan Dana</h2>
     <form id="withdrawForm">
       <label for="nominal">Nominal Withdraw (Rp)</label>
-      <input type="number" id="nominal" required min="10000"/>
+      <input type="number" id="nominal" required min="50000"/>
 
       <label for="metode">Metode Penarikan</label>
       <select id="metode" required>
         <option value="">Pilih</option>
         <option value="DANA">DANA</option>
         <option value="OVO">OVO</option>
-        <option value="Bank">Transfer Bank</option>
         <option value="Gopay">Gopay</option>
+        <option value="Bank">Transfer Bank</option>
       </select>
+
+      <div id="bankSection" class="hidden">
+        <label for="namaBank">Nama Bank</label>
+        <input type="text" id="namaBank" placeholder="Contoh: BCA, BRI, Mandiri"/>
+      </div>
 
       <label for="rekening">Nomor Akun / Rekening</label>
       <input type="text" id="rekening" required/>
+
+      <div class="fee-info" id="feeInfo">Rincian biaya akan muncul di sini.</div>
 
       <button type="submit">Kirim Withdraw</button>
       <div class="status" id="statusMsg"></div>
@@ -85,6 +104,45 @@
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const { auth, db, doc, getDoc, updateDoc, collection, addDoc, Timestamp } = firebaseObj;
+
+    const nominalInput = document.getElementById('nominal');
+    const metodeInput = document.getElementById('metode');
+    const bankSection = document.getElementById('bankSection');
+    const feeInfo = document.getElementById('feeInfo');
+
+    function updateFeeInfo() {
+      const nominal = parseInt(nominalInput.value || 0);
+      const metode = metodeInput.value;
+
+      let fee = 0;
+      let total = 0;
+      if (metode === "Bank") {
+        fee = nominal * 0.12;
+      } else if (["DANA", "OVO", "Gopay"].includes(metode)) {
+        fee = nominal * 0.15;
+      }
+
+      if (nominal >= 50000 && metode) {
+        total = nominal - fee;
+        feeInfo.innerHTML = `
+          <strong>Rincian:</strong><br/>
+          Biaya admin: Rp ${Math.floor(fee).toLocaleString('id-ID')}<br/>
+          Total diterima: Rp ${Math.floor(total).toLocaleString('id-ID')}
+        `;
+      } else {
+        feeInfo.textContent = "Rincian biaya akan muncul di sini.";
+      }
+    }
+
+    nominalInput.addEventListener('input', updateFeeInfo);
+    metodeInput.addEventListener('change', () => {
+      updateFeeInfo();
+      if (metodeInput.value === "Bank") {
+        bankSection.classList.remove('hidden');
+      } else {
+        bankSection.classList.add('hidden');
+      }
+    });
 
     const form = document.getElementById('withdrawForm');
     const statusMsg = document.getElementById('statusMsg');
@@ -100,9 +158,15 @@
       e.preventDefault();
       statusMsg.textContent = "";
 
-      const nominal = parseInt(document.getElementById('nominal').value);
-      const metode = document.getElementById('metode').value;
+      const nominal = parseInt(nominalInput.value);
+      const metode = metodeInput.value;
       const rekening = document.getElementById('rekening').value;
+      const namaBank = document.getElementById('namaBank').value;
+
+      if (nominal < 50000) {
+        statusMsg.innerHTML = "<span class='error'>Minimal withdraw adalah Rp 50.000.</span>";
+        return;
+      }
 
       const user = auth.currentUser;
       if (!user) return;
@@ -122,24 +186,31 @@
           return;
         }
 
-        // Catat withdraw ke Firestore
+        // Hitung fee
+        const fee = metode === "Bank" ? nominal * 0.12 : nominal * 0.15;
+
+        // Simpan withdraw
         await addDoc(collection(db, 'withdraw'), {
           userId: user.uid,
           email: user.email,
           nominal,
           metode,
           rekening,
+          namaBank: metode === "Bank" ? namaBank : "",
+          fee: Math.floor(fee),
           status: "pending",
           createdAt: Timestamp.now()
         });
 
-        // Kurangi saldo pengguna
+        // Update saldo pengguna
         await updateDoc(userRef, {
           saldo: userData.saldo - nominal
         });
 
-        statusMsg.innerHTML = "<span class='success'>Permintaan withdraw berhasil dikirim.</span>";
+        statusMsg.innerHTML = "<span class='success'>Withdraw berhasil dikirim.</span>";
         form.reset();
+        feeInfo.textContent = "Rincian biaya akan muncul di sini.";
+        bankSection.classList.add('hidden');
       } catch (err) {
         console.error(err);
         statusMsg.innerHTML = "<span class='error'>Gagal memproses withdraw.</span>";
