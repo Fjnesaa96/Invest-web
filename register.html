@@ -7,36 +7,56 @@
   <script type="module" src="firebase.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f5f9ff;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      margin: 0;
     }
-    .container {
-      background: white;
-      padding: 25px;
+    .register-container {
+      background: #fff;
+      padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      width: 100%;
       max-width: 400px;
-      width: 100%;
     }
-    input, button {
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #007BFF;
+    }
+    input {
       width: 100%;
-      padding: 10px;
-      margin-top: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
     button {
-      background: #007bff;
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
       color: white;
       border: none;
+      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
+    }
+    .link {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .link a {
+      color: #007BFF;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="register-container">
     <h2>Daftar IndoCapital</h2>
     <form id="registerForm">
       <input type="text" id="nama" placeholder="Nama Lengkap" required />
@@ -44,10 +64,14 @@
       <input type="password" id="password" placeholder="Kata Sandi" required />
       <button type="submit">Daftar</button>
     </form>
+    <div class="link">
+      Sudah punya akun? <a href="index.html">Masuk</a>
+    </div>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
+
     const {
       auth,
       db,
@@ -61,10 +85,15 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const nama = document.getElementById('nama').value;
-      const email = document.getElementById('email').value;
+
+      const nama = document.getElementById('nama').value.trim();
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
+
+      if (!nama || !email || !password) {
+        alert('Semua kolom wajib diisi.');
+        return;
+      }
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
