@@ -4,55 +4,84 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | IndoCapital</title>
-  <script type="module" src="firebase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #007BFF;
+      --secondary-color: #0056b3;
+      --light-bg: #f0f4fa;
+      --border-radius: 12px;
+    }
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      background: #f8f9fa;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-bg);
     }
-    h2 {
-      text-align: center;
+    .navbar {
+      background-color: white;
+      padding: 15px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    #userInfo {
-      margin-top: 20px;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      line-height: 1.8em;
+    .navbar h1 {
+      font-size: 20px;
+      color: var(--primary-color);
+      margin: 0;
     }
-    .buttons {
-      margin-top: 30px;
-      text-align: center;
-    }
-    .buttons a, .buttons button {
-      padding: 10px 20px;
-      margin: 5px;
-      text-decoration: none;
-      border: none;
-      background: #3498db;
+    .logout-btn {
+      padding: 8px 15px;
+      background-color: var(--primary-color);
       color: white;
-      border-radius: 5px;
+      border: none;
+      border-radius: var(--border-radius);
       cursor: pointer;
     }
-    #logout {
-      background: #e74c3c;
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .card {
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      color: #333;
+    }
+    .card p {
+      font-size: 16px;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <h2>Dashboard Investor</h2>
-  <div id="userInfo">Memuat data pengguna...</div>
+  <div class="navbar">
+    <h1>IndoCapital</h1>
+    <button class="logout-btn" id="logout">Keluar</button>
+  </div>
 
-  <div class="buttons">
-    <a href="profil.html">Lihat Profil</a>
-    <a href="deposit.html">Deposit</a>
-    <a href="withdraw.html">Withdraw</a>
-    <a href="riwayat.html">Riwayat Transaksi</a>
-    <button id="logout">Keluar</button>
+  <div class="container">
+    <div class="card">
+      <h3>Data Pengguna</h3>
+      <p id="userInfo">Memuat data pengguna...</p>
+    </div>
+    <div class="card">
+      <h3>Saldo Aktif</h3>
+      <p id="balance">Rp -</p>
+    </div>
+    <div class="card">
+      <h3>Riwayat Terbaru</h3>
+      <p>Belum ada transaksi.</p>
+    </div>
   </div>
 
   <script type="module">
@@ -61,24 +90,12 @@
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        try {
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
-
-          if (userSnap.exists()) {
-            const data = userSnap.data();
-            document.getElementById('userInfo').innerHTML = `
-              <strong>Halo, ${data.nama || user.email}</strong><br>
-              Email: ${data.email}<br>
-              No. HP: ${data.telepon || '-'}<br>
-              Saldo: <strong>Rp ${Number(data.saldo || 0).toLocaleString()}</strong>
-            `;
-          } else {
-            document.getElementById('userInfo').innerText = 'Data pengguna tidak ditemukan di database.';
-          }
-        } catch (error) {
-          console.error(error);
-          document.getElementById('userInfo').innerText = 'Gagal memuat data pengguna.';
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          document.getElementById('userInfo').innerText = `Email: ${userSnap.data().email}`;
+        } else {
+          document.getElementById('userInfo').innerText = 'Data pengguna tidak ditemukan.';
         }
       } else {
         window.location.href = 'index.html';
