@@ -9,7 +9,7 @@
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f3f6fc;
+      background-color: #f4f9ff;
       padding: 30px;
     }
     .container {
@@ -18,18 +18,19 @@
       background: white;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
       color: #007BFF;
+      margin-bottom: 20px;
     }
     label {
       font-weight: 600;
-      margin-top: 15px;
       display: block;
+      margin-top: 15px;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 12px;
       margin-top: 5px;
@@ -40,7 +41,7 @@
     button {
       width: 100%;
       padding: 14px;
-      background-color: #007BFF;
+      background-color: #28a745;
       color: white;
       font-weight: bold;
       border: none;
@@ -48,87 +49,83 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    .info {
-      background: #eef5ff;
-      padding: 10px;
+    .info, .success, .error {
       font-size: 14px;
-      border-left: 4px solid #007BFF;
-      margin-bottom: 15px;
-      border-radius: 4px;
+      text-align: center;
+      margin-top: 10px;
     }
-    .success { color: green; text-align: center; margin-top: 15px; }
-    .error { color: red; text-align: center; margin-top: 15px; }
+    .info { color: #555; }
+    .success { color: green; }
+    .error { color: red; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Penarikan Dana</h2>
-    <div class="info" id="saldoInfo">Memuat saldo...</div>
-    <form id="withdrawForm">
-      <label for="jumlah">Jumlah Penarikan</label>
-      <input type="number" id="jumlah" placeholder="Contoh: 100000" required />
+    <div id="infoRekening" class="info">Memuat akun bank/ewallet Anda...</div>
 
-      <label for="metode">Metode Penarikan</label>
-      <select id="metode" required>
-        <option value="">Pilih</option>
-        <option value="Bank">Transfer Bank</option>
-        <option value="E-Wallet">E-Wallet</option>
-      </select>
+    <form id="withdrawForm" style="display: none;">
+      <label>Jumlah Penarikan (Rp)</label>
+      <input type="number" id="jumlah" required />
 
-      <label for="jenis">Jenis Bank / E-Wallet</label>
-      <select id="jenis" required>
-        <option value="">Pilih</option>
-        <option value="BCA">BCA</option>
-        <option value="BRI">BRI</option>
-        <option value="BNI">BNI</option>
-        <option value="Mandiri">Mandiri</option>
-        <option value="CIMB Niaga">CIMB Niaga</option>
-        <option value="BSI">BSI</option>
-        <option value="Dana">Dana</option>
-        <option value="OVO">OVO</option>
-        <option value="GoPay">GoPay</option>
-        <option value="ShopeePay">ShopeePay</option>
-        <option value="LinkAja">LinkAja</option>
-      </select>
-
-      <label for="rekening">Nomor Rekening / E-Wallet</label>
-      <input type="text" id="rekening" required />
-
-      <button type="submit">Kirim Permintaan</button>
-      <div id="msg"></div>
+      <div class="info" id="biayaInfo"></div>
+      <div class="info" id="saldoInfo"></div>
+      <button type="submit">Tarik Dana</button>
     </form>
 
-    <div class="info">
-      <b>Minimum Penarikan:</b><br>
-      • Bank: Rp50.000 (Fee 12%)<br>
-      • E-Wallet: Rp1.000 (Fee 15%)<br>
-      <b>Catatan:</b> Anda hanya dapat mengganti akun tujuan maksimal 3 kali.
-    </div>
+    <div id="msg"></div>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const {
-      auth, db, doc, getDoc, updateDoc, collection, addDoc, Timestamp
+      auth, db, doc, getDoc, collection, addDoc, Timestamp
     } = firebaseObj;
 
+    const jumlahEl = document.getElementById('jumlah');
     const form = document.getElementById('withdrawForm');
+    const infoRekening = document.getElementById('infoRekening');
     const msg = document.getElementById('msg');
+    const biayaInfo = document.getElementById('biayaInfo');
     const saldoInfo = document.getElementById('saldoInfo');
 
-    let user, saldo = 0;
+    let userData, user;
 
     auth.onAuthStateChanged(async (u) => {
       if (u) {
         user = u;
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          saldo = snap.data().saldo || 0;
-          saldoInfo.innerText = `Saldo tersedia: Rp ${saldo.toLocaleString('id-ID')}`;
-        } else {
-          saldoInfo.innerText = 'Data pengguna tidak ditemukan.';
+        const userSnap = await getDoc(doc(db, 'users', u.uid));
+        if (!userSnap.exists()) {
+          infoRekening.innerText = 'Data pengguna tidak ditemukan.';
+          return;
         }
+        userData = userSnap.data();
+        const { bank, rekening, saldo } = userData;
+
+        if (!bank || !rekening) {
+          infoRekening.innerHTML = '<span class="error">Anda belum menautkan akun bank atau e-wallet. Silakan update di profil.</span>';
+          return;
+        }
+
+        infoRekening.innerHTML = `
+          <strong>${bank}</strong><br>No. Rekening/HP: ${rekening}<br>Saldo tersedia: Rp${saldo.toLocaleString()}
+        `;
+        saldoInfo.innerText = `Saldo yang dapat ditarik: Rp${saldo.toLocaleString()}`;
+        form.style.display = 'block';
+
+        jumlahEl.addEventListener('input', () => {
+          const jml = parseInt(jumlahEl.value || 0);
+          let fee = 0;
+          if (['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(bank)) {
+            fee = Math.ceil(jml * 0.15);
+          } else {
+            fee = Math.ceil(jml * 0.12);
+          }
+
+          const total = jml - fee;
+          biayaInfo.innerText = `Biaya: Rp${fee.toLocaleString()} | Total diterima: Rp${total.toLocaleString()}`;
+        });
+
       } else {
         window.location.href = 'index.html';
       }
@@ -136,51 +133,41 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.innerHTML = '';
+      const jumlah = parseInt(jumlahEl.value);
+      if (!jumlah || jumlah <= 0) return;
 
-      const jumlah = parseInt(document.getElementById('jumlah').value);
-      const metode = document.getElementById('metode').value;
-      const jenis = document.getElementById('jenis').value;
-      const rekening = document.getElementById('rekening').value;
+      const isEwallet = ['Dana', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'].includes(userData.bank);
+      const min = isEwallet ? 1000 : 50000;
+      const fee = Math.ceil(jumlah * (isEwallet ? 0.15 : 0.12));
+      const after = jumlah - fee;
 
-      if (!metode || !jenis || !rekening || isNaN(jumlah)) {
-        msg.innerHTML = '<p class="error">Semua kolom wajib diisi.</p>';
-        return;
-      }
-
-      const fee = metode === 'Bank' ? 0.12 : 0.15;
-      const min = metode === 'Bank' ? 50000 : 1000;
       if (jumlah < min) {
-        msg.innerHTML = `<p class="error">Minimal penarikan untuk ${metode} adalah Rp ${min.toLocaleString('id-ID')}</p>`;
+        msg.innerHTML = `<p class="error">Minimal penarikan untuk ${userData.bank} adalah Rp${min.toLocaleString()}.</p>`;
         return;
       }
 
-      const total = jumlah + jumlah * fee;
-      if (total > saldo) {
-        msg.innerHTML = `<p class="error">Saldo tidak mencukupi. Total + fee: Rp ${total.toLocaleString('id-ID')}</p>`;
+      if (jumlah > userData.saldo) {
+        msg.innerHTML = '<p class="error">Saldo Anda tidak mencukupi.</p>';
         return;
       }
 
       try {
         await addDoc(collection(db, 'withdraw'), {
           userId: user.uid,
-          email: user.email,
-          jumlah,
-          metode,
-          jenis,
-          rekening,
-          fee: fee * 100,
+          nama: userData.nama,
+          email: userData.email,
+          bank: userData.bank,
+          rekening: userData.rekening,
+          nominal: jumlah,
+          fee: fee,
+          diterima: after,
           status: 'pending',
           createdAt: Timestamp.now()
         });
 
-        // Kurangi saldo
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, { saldo: saldo - total });
-
         msg.innerHTML = '<p class="success">Permintaan penarikan berhasil dikirim.</p>';
         form.reset();
-        saldoInfo.innerText = `Saldo tersedia: Rp ${(saldo - total).toLocaleString('id-ID')}`;
+        biayaInfo.innerText = '';
       } catch (err) {
         console.error(err);
         msg.innerHTML = '<p class="error">Gagal mengirim penarikan.</p>';
