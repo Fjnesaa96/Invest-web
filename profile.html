@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil Pengguna | IndoCapital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f8ff;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: linear-gradient(to right, #0052d4, #4364f7);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom-left-radius: 25px;
+      border-bottom-right-radius: 25px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .info-row span:first-child {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .info-row span:last-child {
+      color: #333;
+    }
+
+    #logout {
+      display: block;
+      width: 100%;
+      margin-top: 30px;
+      background: #ff4d4f;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #logout:hover {
+      background: #cc0000;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Profil Pengguna</h2>
+  </header>
+
+  <div class="container">
+    <div class="info-row"><span>Nama:</span> <span id="nama">...</span></div>
+    <div class="info-row"><span>Email:</span> <span id="email">...</span></div>
+    <div class="info-row"><span>Terdaftar:</span> <span id="createdAt">...</span></div>
+
+    <button id="logout">Keluar</button>
+
+    <div class="back-link">
+      <a href="dashboard.html">← Kembali ke Dashboard</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { firebaseObj } from './firebase.js';
+    const { auth, db, doc, getDoc, onAuthStateChanged, signOut, Timestamp } = firebaseObj;
+
+    const namaEl = document.getElementById('nama');
+    const emailEl = document.getElementById('email');
+    const createdEl = document.getElementById('createdAt');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const docRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        namaEl.textContent = data.nama || '-';
+        emailEl.textContent = data.email || '-';
+        const date = data.createdAt?.toDate();
+        createdEl.textContent = date ? date.toLocaleDateString('id-ID') : '-';
+      } else {
+        namaEl.textContent = 'Tidak ditemukan';
+      }
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
