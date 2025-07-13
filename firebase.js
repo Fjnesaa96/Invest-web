@@ -10,7 +10,7 @@ import {
   getStorage, ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
-// Ganti ini dengan konfigurasi Firebase milikmu
+// 🔧 Ganti ini dengan konfigurasi Firebase milikmu
 const firebaseConfig = {
   apiKey: "AIzaSyCyXfGd92WDVlKapqTtfUAlElfwICxjzNc",
   authDomain: "indocapital-21d1f.firebaseapp.com",
@@ -21,12 +21,13 @@ const firebaseConfig = {
   measurementId: "G-F62Q0YETB5"
 };
 
-// Inisialisasi Firebase
+// 🔥 Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
+// ✅ Ekspor fungsi-fungsi penting
 export const firebaseObj = {
   auth,
   db,
@@ -46,7 +47,6 @@ export const firebaseObj = {
   Timestamp,
   signOut,
   onAuthStateChanged,
-  createUserWithEmailAndPassword,
+  createUserWithEmailAndPassword, // ✅ Sudah benar
   signInWithEmailAndPassword
 };
-  
