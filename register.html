@@ -4,60 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar | IndoCapital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: sans-serif;
       background-color: #f5f9ff;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
     }
-    .register-container {
-      background: #fff;
-      padding: 30px;
+    .container {
+      background: white;
+      padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      width: 100%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       max-width: 400px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #007BFF;
-    }
-    input {
       width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
     }
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: #007BFF;
+      background: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-weight: bold;
       cursor: pointer;
-    }
-    .link {
-      text-align: center;
-      margin-top: 15px;
-    }
-    .link a {
-      color: #007BFF;
-      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="register-container">
+  <div class="container">
     <h2>Daftar IndoCapital</h2>
     <form id="registerForm">
       <input type="text" id="nama" placeholder="Nama Lengkap" required />
@@ -65,9 +44,6 @@
       <input type="password" id="password" placeholder="Kata Sandi" required />
       <button type="submit">Daftar</button>
     </form>
-    <div class="link">
-      Sudah punya akun? <a href="index.html">Masuk</a>
-    </div>
   </div>
 
   <script type="module">
@@ -78,14 +54,14 @@
       createUserWithEmailAndPassword,
       setDoc,
       doc,
-      Timestamp // ⬅️ Tambahkan ini!
+      Timestamp
     } = firebaseObj;
 
     const form = document.getElementById('registerForm');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
+      
       const nama = document.getElementById('nama').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -95,17 +71,17 @@
         const user = userCredential.user;
 
         await setDoc(doc(db, 'users', user.uid), {
-          nama: nama,
-          email: email,
+          nama,
+          email,
           saldo: 0,
           createdAt: Timestamp.now()
         });
 
         alert('Registrasi berhasil!');
         window.location.href = 'index.html';
-      } catch (error) {
-        alert('Gagal registrasi: ' + error.message);
-        console.error(error);
+      } catch (err) {
+        console.error('Gagal registrasi:', err);
+        alert('Gagal registrasi: ' + err.message);
       }
     });
   </script>
