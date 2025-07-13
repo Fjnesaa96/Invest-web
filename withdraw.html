@@ -68,11 +68,25 @@
     .hidden {
       display: none;
     }
+    .saldo-box {
+      background: #f0fbff;
+      border-left: 5px solid #00bfff;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      color: #333;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Penarikan Dana</h2>
+
+    <div class="saldo-box" id="infoSaldo">
+      Memuat saldo pengguna...
+    </div>
+
     <form id="withdrawForm">
       <label for="nominal">Nominal Withdraw (Rp)</label>
       <input type="number" id="nominal" required min="50000"/>
@@ -87,8 +101,35 @@
       </select>
 
       <div id="bankSection" class="hidden">
-        <label for="namaBank">Nama Bank</label>
-        <input type="text" id="namaBank" placeholder="Contoh: BCA, BRI, Mandiri"/>
+        <label for="namaBank">Pilih Bank Tujuan</label>
+        <select id="namaBank">
+          <option value="">Pilih Bank</option>
+          <option value="BCA">BCA</option>
+          <option value="BNI">BNI</option>
+          <option value="BRI">BRI</option>
+          <option value="Mandiri">Mandiri</option>
+          <option value="BSI">BSI</option>
+          <option value="BTN">BTN</option>
+          <option value="CIMB">CIMB Niaga</option>
+          <option value="Permata">Permata</option>
+          <option value="Danamon">Danamon</option>
+          <option value="OCBC">OCBC NISP</option>
+          <option value="Panin">Panin</option>
+          <option value="Maybank">Maybank</option>
+          <option value="BTPN">BTPN / Jenius</option>
+          <option value="UOB">UOB</option>
+          <option value="Bank Mega">Bank Mega</option>
+          <option value="BJB">Bank Jabar (BJB)</option>
+          <option value="Bank DKI">Bank DKI</option>
+          <option value="Bank Aceh">Bank Aceh</option>
+          <option value="Bank Papua">Bank Papua</option>
+          <option value="Bank Nagari">Bank Nagari</option>
+          <option value="Bank NTB">Bank NTB Syariah</option>
+          <option value="Bank NTT">Bank NTT</option>
+          <option value="Bank Sumsel">Bank Sumsel Babel</option>
+          <option value="Bank SulutGo">Bank SulutGo</option>
+          <!-- Tambahkan lebih banyak bank jika perlu -->
+        </select>
       </div>
 
       <label for="rekening">Nomor Akun / Rekening</label>
@@ -109,6 +150,10 @@
     const metodeInput = document.getElementById('metode');
     const bankSection = document.getElementById('bankSection');
     const feeInfo = document.getElementById('feeInfo');
+    const infoSaldo = document.getElementById('infoSaldo');
+    const statusMsg = document.getElementById('statusMsg');
+
+    let currentSaldo = 0;
 
     function updateFeeInfo() {
       const nominal = parseInt(nominalInput.value || 0);
@@ -137,23 +182,37 @@
     nominalInput.addEventListener('input', updateFeeInfo);
     metodeInput.addEventListener('change', () => {
       updateFeeInfo();
-      if (metodeInput.value === "Bank") {
-        bankSection.classList.remove('hidden');
-      } else {
-        bankSection.classList.add('hidden');
-      }
+      bankSection.classList.toggle('hidden', metodeInput.value !== "Bank");
     });
-
-    const form = document.getElementById('withdrawForm');
-    const statusMsg = document.getElementById('statusMsg');
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         alert("Anda belum login.");
         window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          currentSaldo = data.saldo || 0;
+          infoSaldo.innerHTML = `
+            <strong>Saldo Anda:</strong> Rp ${currentSaldo.toLocaleString('id-ID')}<br/>
+            <strong>Minimum Withdraw:</strong> Rp 50.000
+          `;
+        } else {
+          infoSaldo.innerHTML = `<span class="error">Gagal memuat data pengguna.</span>`;
+        }
+      } catch (err) {
+        console.error(err);
+        infoSaldo.innerHTML = `<span class="error">Terjadi kesalahan saat mengambil data.</span>`;
       }
     });
 
+    const form = document.getElementById('withdrawForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       statusMsg.textContent = "";
@@ -168,28 +227,19 @@
         return;
       }
 
-      const user = auth.currentUser;
-      if (!user) return;
+      if (nominal > currentSaldo) {
+        statusMsg.innerHTML = "<span class='error'>Saldo tidak mencukupi.</span>";
+        return;
+      }
+
+      const fee = metode === "Bank" ? nominal * 0.12 : nominal * 0.15;
 
       try {
+        const user = auth.currentUser;
+        if (!user) return;
+
         const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
 
-        if (!userSnap.exists()) {
-          statusMsg.innerHTML = "<span class='error'>Data pengguna tidak ditemukan.</span>";
-          return;
-        }
-
-        const userData = userSnap.data();
-        if (userData.saldo < nominal) {
-          statusMsg.innerHTML = "<span class='error'>Saldo tidak mencukupi.</span>";
-          return;
-        }
-
-        // Hitung fee
-        const fee = metode === "Bank" ? nominal * 0.12 : nominal * 0.15;
-
-        // Simpan withdraw
         await addDoc(collection(db, 'withdraw'), {
           userId: user.uid,
           email: user.email,
@@ -202,14 +252,14 @@
           createdAt: Timestamp.now()
         });
 
-        // Update saldo pengguna
         await updateDoc(userRef, {
-          saldo: userData.saldo - nominal
+          saldo: currentSaldo - nominal
         });
 
         statusMsg.innerHTML = "<span class='success'>Withdraw berhasil dikirim.</span>";
         form.reset();
         feeInfo.textContent = "Rincian biaya akan muncul di sini.";
+        infoSaldo.innerHTML = `Saldo Anda: Rp ${(currentSaldo - nominal).toLocaleString('id-ID')}<br/>Minimum Withdraw: Rp 50.000`;
         bankSection.classList.add('hidden');
       } catch (err) {
         console.error(err);
