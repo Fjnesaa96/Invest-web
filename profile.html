@@ -47,14 +47,19 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-top: 10px;
     }
-    .info, .success, .error {
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+    .success, .error, .info {
       text-align: center;
-      margin-top: 15px;
       font-size: 14px;
+      margin-top: 10px;
     }
     .success { color: green; }
     .error { color: red; }
+    .info { color: #555; }
   </style>
 </head>
 <body>
@@ -88,14 +93,18 @@
 
       <button type="submit">Simpan Perubahan</button>
     </form>
+
     <div class="info">Batas ubah akun maks. 3x</div>
     <div id="msg"></div>
+
+    <button id="backDashboard" class="btn-secondary">⬅ Kembali ke Dashboard</button>
+    <button id="logout" class="btn-secondary">🔓 Logout</button>
   </div>
 
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const {
-      auth, db, doc, getDoc, updateDoc
+      auth, db, doc, getDoc, updateDoc, signOut
     } = firebaseObj;
 
     const form = document.getElementById('profilForm');
@@ -122,9 +131,9 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nama = document.getElementById('nama').value;
-      const jenisAkun = document.getElementById('jenisAkun').value;
-      const noRek = document.getElementById('noRek').value;
+      const nama = document.getElementById('nama').value.trim();
+      const jenisAkun = document.getElementById('jenisAkun').value.trim();
+      const noRek = document.getElementById('noRek').value.trim();
 
       if (!nama || !jenisAkun || !noRek) {
         msg.innerHTML = '<p class="error">Semua kolom harus diisi.</p>';
@@ -161,6 +170,15 @@
         console.error(err);
         msg.innerHTML = '<p class="error">Gagal menyimpan perubahan.</p>';
       }
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('backDashboard').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
     });
   </script>
 </body>
