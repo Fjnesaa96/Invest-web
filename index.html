@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register | IndoCapital</title>
+  <title>Login | IndoCapital</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -43,7 +43,7 @@
       margin-bottom: 20px;
       color: var(--primary-color);
     }
-    input[type="text"], input[type="email"], input[type="password"] {
+    input[type="email"], input[type="password"] {
       width: 100%;
       padding: 12px;
       margin-bottom: 15px;
@@ -65,7 +65,7 @@
     button:hover {
       background-color: var(--secondary-color);
     }
-    .login-link {
+    .register-link {
       display: block;
       margin-top: 15px;
       font-size: 14px;
@@ -75,11 +75,13 @@
 <body>
   <div class="container">
     <img src="/assets/logo.svg" alt="Logo IndoCapital" class="logo">
-    <h2>Daftar ke IndoCapital</h2>
-    <form id="registerForm">
-      <input type="text" placeholder="Nama Lengkap" required />
+    <h2>Masuk ke IndoCapital</h2>
+    <form id="loginForm">
       <input type="email" placeholder="Email" required />
       <input type="password" placeholder="Kata Sandi" required />
-      <button type="submit">Daftar</button>
+      <button type="submit">Masuk</button>
     </form>
-    <a href="index.html" class="login-link">Sudah punya akun
+    <a href="register.html" class="register-link">Belum punya akun? Daftar</a>
+  </div>
+</body>
+</html>
