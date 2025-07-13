@@ -3,30 +3,86 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login | IndoCapital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #eef4ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .link {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Login IndoCapital</h2>
-  <form id="loginForm">
-    <input type="email" placeholder="Email" required />
-    <input type="password" placeholder="Kata Sandi" required />
-    <button type="submit">Masuk</button>
-  </form>
+  <div class="login-box">
+    <h2>Login IndoCapital</h2>
+    <form id="loginForm">
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Kata Sandi" required />
+      <button type="submit">Masuk</button>
+    </form>
+    <div class="link">
+      Belum punya akun? <a href="register.html">Daftar</a>
+    </div>
+  </div>
   <script type="module">
     import { firebaseObj } from './firebase.js';
     const { auth, signInWithEmailAndPassword } = firebaseObj;
+
     const form = document.getElementById('loginForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = form.querySelector('input[type="email"]').value;
       const password = form.querySelector('input[type="password"]').value;
+
       try {
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = 'dashboard.html';
-      } catch (err) {
-        alert('Gagal login: ' + err.message);
+      } catch (error) {
+        alert('Gagal login: ' + error.message);
       }
     });
   </script>
