@@ -1,1 +1,0 @@
-// Firebase connection config here
