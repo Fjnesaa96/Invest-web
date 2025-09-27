@@ -1,108 +1,127 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard | IndoCapital</title>
-  <script type="module" src="firebase.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Good Invest</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: #f5f7fc;
       margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      max-width: 480px;
-      margin: auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.05);
-      text-align: center;
-    }
-    h2 {
-      color: #2e7df6;
-    }
-    .saldo {
-      font-size: 1.3em;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin: 10px 0;
-      font-size: 1em;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-    .btn-primary {
-      background: #2e7df6;
+      background: linear-gradient(135deg, #0a74da, #042b5c);
       color: white;
     }
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #333;
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.3);
     }
-    .btn-outline {
+    .navbar h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    .user-info {
+      padding: 20px;
+      text-align: center;
+    }
+    .user-info h2 {
+      margin: 5px 0;
+    }
+    .balance {
       background: white;
-      border: 2px solid #2e7df6;
-      color: #2e7df6;
+      color: #0a74da;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
-    .status {
-      margin-top: 15px;
-      font-size: 0.9em;
-      color: red;
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      padding: 20px;
+    }
+    .menu button {
+      background: white;
+      color: #0a74da;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: 0.3s;
+    }
+    .menu button:hover {
+      background: #0a74da;
+      color: white;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Selamat Datang 👋</h2>
-    <div class="saldo">Saldo: <span id="saldoText">Rp 0</span></div>
-
-    <button onclick="location.href='profile.html'" class="btn-secondary">👤 Profil</button>
-    <button onclick="location.href='deposit.html'" class="btn-primary">➕ Deposit</button>
-    <button onclick="location.href='withdraw.html'" class="btn-primary">💸 Withdraw</button>
-    <button onclick="location.href='riwayat.html'" class="btn-outline">📑 Riwayat Transaksi</button>
-    <button onclick="location.href='investasi.html'" class="btn-outline">📈 Investasi</button>
-
-    <button onclick="logout()" class="btn-secondary">🚪 Logout</button>
-    <div class="status" id="statusMsg"></div>
+  <div class="navbar">
+    <h1>Good Invest</h1>
+    <button onclick="logout()" style="background:red;color:white;padding:8px 15px;border:none;border-radius:8px;cursor:pointer;">Logout</button>
   </div>
 
-  <script type="module">
-    import { firebaseObj } from './firebase.js';
-    const { auth, db, doc, getDoc, signOut, onAuthStateChanged } = firebaseObj;
+  <div class="user-info">
+    <h2 id="welcomeText">Selamat datang, User</h2>
+  </div>
 
-    const saldoText = document.getElementById('saldoText');
-    const statusMsg = document.getElementById('statusMsg');
+  <div class="balance">
+    Saldo: Rp <span id="userBalance">0</span>
+  </div>
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          saldoText.innerText = 'Rp ' + (data.saldo || 0).toLocaleString();
-        } else {
-          statusMsg.textContent = '❌ Data pengguna tidak ditemukan.';
-        }
-      } else {
-        location.href = 'index.html';
-      }
-    });
+  <div class="menu">
+    <button onclick="goPage('profil.html')">Profil</button>
+    <button onclick="goPage('deposit.html')">Deposit</button>
+    <button onclick="goPage('withdraw.html')">Withdraw</button>
+    <button onclick="goPage('riwayat.html')">Riwayat</button>
+    <button onclick="goPage('investasi.html')">Investasi</button>
+  </div>
 
-    window.logout = async () => {
-      await signOut(auth);
-      location.href = 'index.html';
-    };
+  <script>
+    // Cek user login
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!loggedInUser) {
+      Swal.fire({
+        icon: "warning",
+        title: "Belum Login",
+        text: "Silakan login terlebih dahulu"
+      }).then(() => {
+        window.location.href = "index.html";
+      });
+    } else {
+      document.getElementById("welcomeText").innerText = `Selamat datang, ${loggedInUser.name}`;
+      document.getElementById("userBalance").innerText = loggedInUser.balance.toLocaleString("id-ID");
+    }
+
+    // Fungsi navigasi
+    function goPage(page) {
+      window.location.href = page;
+    }
+
+    // Fungsi logout
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      Swal.fire({
+        icon: "success",
+        title: "Logout Berhasil",
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.href = "index.html";
+      });
+    }
   </script>
 </body>
 </html>
