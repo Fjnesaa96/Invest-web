@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - IndoCapital</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <h2>Admin Panel IndoCapital</h2>
+    <button onclick="logoutAdmin()">Logout</button>
+
+    <h3>Daftar Pengguna</h3>
+    <table border="1" width="100%" style="margin-top:10px; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Saldo</th>
+          <th>Referral</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="userTable"></tbody>
+    </table>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
