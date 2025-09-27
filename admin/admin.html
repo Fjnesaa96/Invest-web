@@ -3,18 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login - IndoCapital</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Login Admin - IndoCapital</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #004e92, #000428);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #004e92;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #004e92;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #006bb3;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
+
+  <div class="login-container">
     <h2>Login Admin</h2>
-    <form onsubmit="loginAdmin(event)">
-      <input type="text" id="adminUser" placeholder="Username" required>
-      <input type="password" id="adminPass" placeholder="Password" required>
-      <button type="submit">Login</button>
-    </form>
+    <input type="text" id="adminUser" placeholder="Username">
+    <input type="password" id="adminPass" placeholder="Password">
+    <button onclick="loginAdmin()">Login</button>
+    <p class="error" id="errorMsg"></p>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    function loginAdmin() {
+      const user = document.getElementById("adminUser").value;
+      const pass = document.getElementById("adminPass").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (user === "admin" && pass === "admin123") {
+        // Simpan status login admin
+        localStorage.setItem("isAdmin", "true");
+        window.location.href = "admin-dashboard.html"; 
+      } else {
+        errorMsg.textContent = "Username atau password salah!";
+      }
+    }
+  </script>
+
 </body>
 </html>
