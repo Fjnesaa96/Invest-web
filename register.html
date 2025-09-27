@@ -3,126 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Good Invest</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #0a74da, #042b5c);
-    }
-
-    .register-container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      text-align: center;
-    }
-
-    .register-container h2 {
-      color: #0a74da;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #0a74da;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background: #042b5c;
-      transform: scale(1.03);
-    }
-
-    .link {
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .link a {
-      color: #0a74da;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    .link a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <title>Register - IndoCapital</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="register-container">
-    <h2>Buat Akun Baru</h2>
+  <div class="auth-container">
+    <h2>Daftar Akun IndoCapital</h2>
     <form id="registerForm">
-      <input type="text" id="nama" placeholder="Nama Lengkap" required>
+      <input type="text" id="fullname" placeholder="Nama Lengkap" required>
       <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Kata Sandi" required>
-      <input type="text" id="referral" placeholder="Kode Referral (Opsional)">
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="text" id="referral" placeholder="Kode Referral (opsional)">
       <button type="submit">Daftar</button>
     </form>
-    <p class="link">
-      Sudah punya akun? <a href="index.html">Login</a>
-    </p>
+    <p>Sudah punya akun? <a href="index.html">Login</a></p>
   </div>
 
-  <script>
-    document.getElementById("registerForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const nama = document.getElementById("nama").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const referral = document.getElementById("referral").value.trim();
-
-      if (!nama || !email || !password) {
-        Swal.fire("Gagal", "Semua kolom wajib diisi", "error");
-        return;
-      }
-
-      // Simpan user ke localStorage (dummy sebelum backend nyata)
-      const user = {
-        name: nama,
-        email: email,
-        balance: 0,
-        referral: referral || null,
-      };
-
-      localStorage.setItem("loggedInUser", JSON.stringify(user));
-
-      Swal.fire({
-        icon: "success",
-        title: "Registrasi Berhasil!",
-        text: "Silakan login untuk melanjutkan",
-        timer: 2000,
-        showConfirmButton: false
-      }).then(() => {
-        window.location.href = "index.html";
-      });
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
