@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - IndoCapital</title>
+  <title>Register IndoCapital</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="auth-container">
-    <h2>Daftar Akun IndoCapital</h2>
-    <form id="registerForm">
+  <div class="container">
+    <h2>Daftar IndoCapital</h2>
+    <form onsubmit="registerUser(event)">
       <input type="text" id="fullname" placeholder="Nama Lengkap" required>
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Password" required>
@@ -18,7 +18,6 @@
     </form>
     <p>Sudah punya akun? <a href="index.html">Login</a></p>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
