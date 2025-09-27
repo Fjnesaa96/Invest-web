@@ -1,58 +1,80 @@
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(to right, #004e92, #000428);
+  background: linear-gradient(135deg, #003366, #004080);
   color: #fff;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  margin: 0;
+  align-items: center;
 }
 
-.auth-container {
+/* Container */
+.container {
   background: #fff;
   color: #333;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   width: 100%;
   max-width: 400px;
   text-align: center;
 }
 
-.auth-container h2 {
-  margin-bottom: 20px;
-  color: #004e92;
-}
+h2 { margin-bottom: 20px; color: #004080; }
 
-.auth-container input {
+input, select, button {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin: 8px 0;
   border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.auth-container button {
-  width: 100%;
-  padding: 12px;
-  background: #004e92;
-  border: none;
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 6px;
   font-size: 16px;
 }
 
-.auth-container button:hover {
-  background: #006ad1;
+button {
+  background: #004080;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.auth-container p {
-  margin-top: 15px;
+button:hover { background: #0066cc; }
+
+a { color: #004080; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Dashboard */
+.dashboard-container {
+  background: #fff;
+  color: #333;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
 }
 
-.auth-container a {
-  color: #004e92;
+.dashboard-container h2 {
+  margin-bottom: 10px;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.menu a, .menu button {
+  background: #004080;
+  color: #fff;
+  margin: 5px;
+  padding: 12px 20px;
+  border-radius: 8px;
   text-decoration: none;
+  flex: 1 1 40%;
+  text-align: center;
 }
