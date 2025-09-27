@@ -1,127 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Good Invest</title>
+  <title>Dashboard - IndoCapital</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      background: linear-gradient(135deg, #0a74da, #042b5c);
-      color: white;
-    }
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 20px;
-      background: rgba(0,0,0,0.3);
-    }
-    .navbar h1 {
-      font-size: 20px;
-      margin: 0;
-    }
-    .user-info {
-      padding: 20px;
-      text-align: center;
-    }
-    .user-info h2 {
-      margin: 5px 0;
-    }
-    .balance {
-      background: white;
-      color: #0a74da;
-      margin: 20px;
-      padding: 20px;
-      border-radius: 15px;
-      font-size: 22px;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      padding: 20px;
-    }
-    .menu button {
-      background: white;
-      color: #0a74da;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      transition: 0.3s;
-    }
-    .menu button:hover {
-      background: #0a74da;
-      color: white;
-      transform: scale(1.05);
-    }
-  </style>
 </head>
 <body>
-  <div class="navbar">
-    <h1>Good Invest</h1>
-    <button onclick="logout()" style="background:red;color:white;padding:8px 15px;border:none;border-radius:8px;cursor:pointer;">Logout</button>
+  <div class="dashboard-container">
+    <h2>Selamat datang, <span id="welcomeName">User</span></h2>
+    <h3>Saldo: <span id="userBalance">Rp 0</span></h3>
+
+    <div class="menu">
+      <a href="profile.html">Profil</a>
+      <a href="deposit.html">Deposit</a>
+      <a href="withdraw.html">Withdraw</a>
+      <a href="investasi.html">Investasi</a>
+      <a href="riwayat.html">Riwayat</a>
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
-
-  <div class="user-info">
-    <h2 id="welcomeText">Selamat datang, User</h2>
-  </div>
-
-  <div class="balance">
-    Saldo: Rp <span id="userBalance">0</span>
-  </div>
-
-  <div class="menu">
-    <button onclick="goPage('profil.html')">Profil</button>
-    <button onclick="goPage('deposit.html')">Deposit</button>
-    <button onclick="goPage('withdraw.html')">Withdraw</button>
-    <button onclick="goPage('riwayat.html')">Riwayat</button>
-    <button onclick="goPage('investasi.html')">Investasi</button>
-  </div>
-
-  <script>
-    // Cek user login
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (!loggedInUser) {
-      Swal.fire({
-        icon: "warning",
-        title: "Belum Login",
-        text: "Silakan login terlebih dahulu"
-      }).then(() => {
-        window.location.href = "index.html";
-      });
-    } else {
-      document.getElementById("welcomeText").innerText = `Selamat datang, ${loggedInUser.name}`;
-      document.getElementById("userBalance").innerText = loggedInUser.balance.toLocaleString("id-ID");
-    }
-
-    // Fungsi navigasi
-    function goPage(page) {
-      window.location.href = page;
-    }
-
-    // Fungsi logout
-    function logout() {
-      localStorage.removeItem("loggedInUser");
-      Swal.fire({
-        icon: "success",
-        title: "Logout Berhasil",
-        timer: 1500,
-        showConfirmButton: false
-      }).then(() => {
-        window.location.href = "index.html";
-      });
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
