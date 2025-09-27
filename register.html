@@ -48,6 +48,10 @@
         <label class="form-label">Password</label>
         <input type="password" id="password" class="form-control" placeholder="Minimal 6 karakter" required>
       </div>
+      <div class="mb-3">
+        <label class="form-label">Referral (Opsional)</label>
+        <input type="text" id="referral" class="form-control" placeholder="Masukkan kode referral jika ada">
+      </div>
       <button type="submit" class="btn btn-primary w-100">Daftar</button>
     </form>
     <p class="mt-3 text-center">Sudah punya akun? <a href="login.html">Login</a></p>
@@ -94,6 +98,7 @@
       const nama = document.getElementById('nama').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const referral = document.getElementById('referral').value || null;
 
       try {
         const userCredential = await firebase.createUserWithEmailAndPassword(auth, email, password);
@@ -102,6 +107,7 @@
         await firebase.setDoc(firebase.doc(db, "users", user.uid), {
           nama: nama,
           email: email,
+          referral: referral,
           saldo: 0,
           createdAt: new Date()
         });
