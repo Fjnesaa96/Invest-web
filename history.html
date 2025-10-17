@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Transaksi | IndoCapital</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="assets/logo.svg" class="logo-small" alt="IndoCapital">
+    <h1>Riwayat Transaksi</h1>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="history-list" id="historyList">
+      <p>Memuat riwayat transaksi...</p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html">🏠</a>
+    <a href="invest.html">💰</a>
+    <a href="history.html" class="active">📜</a>
+    <a href="profile.html">👤</a>
+    <a href="referral.html">🔗</a>
+  </nav>
+
+  <script src="assets/script.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (!user) window.location.href = 'index.html';
+
+    const container = document.getElementById('historyList');
+    const txHistory = JSON.parse(localStorage.getItem('transactions')) || [];
+
+    if (txHistory.length === 0) {
+      container.innerHTML = '<p>Tidak ada transaksi.</p>';
+    } else {
+      container.innerHTML = txHistory.map(tx => `
+        <div class="history-item">
+          <div>
+            <strong>${tx.type}</strong><br>
+            <small>${tx.date}</small>
+          </div>
+          <span class="amount">Rp${tx.amount.toLocaleString()}</span>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
