@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referal | IndoCapital</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="assets/logo.svg" class="logo-small" alt="IndoCapital">
+    <h1>Program Referal</h1>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="referal-card">
+      <h3>Kode Referal Kamu</h3>
+      <div class="ref-box">
+        <input type="text" id="refCode" readonly>
+        <button id="copyRef" class="btn-secondary">Salin</button>
+      </div>
+
+      <p>Bagikan link ini untuk undang teman:</p>
+      <textarea id="refLink" readonly></textarea>
+      <button id="shareRef" class="btn-primary">Bagikan</button>
+
+      <hr>
+
+      <h3>Bonus & Aktivitas</h3>
+      <ul>
+        <li>Total Bonus: <span id="refBonus">Rp0</span></li>
+        <li>Teman Bergabung: <span id="refCount">0</span> orang</li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html">🏠</a>
+    <a href="invest.html">💰</a>
+    <a href="history.html">📜</a>
+    <a href="profile.html">👤</a>
+    <a href="referral.html" class="active">🔗</a>
+  </nav>
+
+  <script src="assets/script.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (!user) window.location.href = 'index.html';
+
+    // Pastikan user punya kode referal
+    if (!user.refCode) {
+      const randomCode = 'IC' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      user.refCode = randomCode;
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    }
+
+    // Tampilkan data referal
+    const refCodeInput = document.getElementById('refCode');
+    const refLink = document.getElementById('refLink');
+    const refBonus = document.getElementById('refBonus');
+    const refCount = document.getElementById('refCount');
+
+    refCodeInput.value = user.refCode;
+    refLink.value = `https://indo-capital.vercel.app/register.html?ref=${user.refCode}`;
+    refBonus.textContent = 'Rp' + (user.refBonus || 0).toLocaleString();
+    refCount.textContent = user.refCount || 0;
+
+    // Tombol salin
+    document.getElementById('copyRef').addEventListener('click', () => {
+      navigator.clipboard.writeText(user.refCode);
+      alert('Kode referal disalin ✅');
+    });
+
+    // Tombol bagikan
+    document.getElementById('shareRef').addEventListener('click', () => {
+      navigator.clipboard.writeText(refLink.value);
+      alert('Link referal disalin, siap dibagikan!');
+    });
+  </script>
+</body>
+</html>
