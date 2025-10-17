@@ -3,23 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - IndoCapital</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Dashboard | IndoCapital</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <div class="dashboard-container">
-    <h2>Selamat datang, <span id="welcomeName">User</span></h2>
-    <h3>Saldo: <span id="userBalance">Rp 0</span></h3>
+  <header class="topbar">
+    <img src="assets/logo.svg" class="logo-small" alt="IndoCapital">
+    <h1>Dashboard</h1>
+  </header>
 
-    <div class="menu">
-      <a href="profile.html">Profil</a>
-      <a href="deposit.html">Deposit</a>
-      <a href="withdraw.html">Withdraw</a>
-      <a href="investasi.html">Investasi</a>
-      <a href="riwayat.html">Riwayat</a>
-      <button onclick="logout()">Logout</button>
-    </div>
-  </div>
-  <script src="script.js"></script>
+  <main class="dashboard-container">
+    <section class="balance-card">
+      <p>Saldo Kamu</p>
+      <h2 id="userBalance">Rp0</h2>
+      <p class="small-text" id="userNameDisplay">Selamat datang, Investor!</p>
+    </section>
+
+    <section class="action-buttons">
+      <a href="invest.html" class="btn-primary">Mulai Investasi</a>
+      <a href="history.html" class="btn-secondary">Lihat Riwayat</a>
+    </section>
+
+    <section class="info-section">
+      <h3>Statistik Singkat</h3>
+      <ul>
+        <li>Total Investasi: <span id="totalInvest">Rp0</span></li>
+        <li>Bonus Referal: <span id="bonusRef">Rp0</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="active">🏠</a>
+    <a href="invest.html">💰</a>
+    <a href="history.html">📜</a>
+    <a href="profile.html">👤</a>
+    <a href="referral.html">🔗</a>
+  </nav>
+
+  <script src="assets/script.js"></script>
+  <script>
+    // Tampilkan nama dan saldo dari localStorage
+    const user = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (!user) window.location.href = 'index.html';
+
+    document.getElementById('userNameDisplay').textContent = 'Halo, ' + user.name;
+    document.getElementById('userBalance').textContent = 'Rp' + (user.balance || 0).toLocaleString();
+    document.getElementById('bonusRef').textContent = 'Rp' + (user.refBonus || 0).toLocaleString();
+  </script>
 </body>
 </html>
