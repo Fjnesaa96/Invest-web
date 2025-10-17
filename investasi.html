@@ -1,157 +1,88 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Investasi TRX | IndoCapital</title>
-  <script type="module" src="firebase.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f0f4fc;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      max-width: 480px;
-      margin: auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #2e7df6;
-    }
-    .product {
-      text-align: center;
-      padding: 20px;
-    }
-    .trx-logo {
-      width: 60px;
-      margin-bottom: 15px;
-    }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      background: #2e7df6;
-      cursor: pointer;
-    }
-    .info {
-      font-size: 15px;
-      margin: 8px 0;
-    }
-    #message {
-      margin-top: 15px;
-      text-align: center;
-      color: green;
-      font-weight: 500;
-    }
-    .back {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .back a {
-      text-decoration: none;
-      color: #2e7df6;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investasi | IndoCapital</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Investasi Penambangan TRX</h2>
-    <div class="product">
-      <img src="https://cryptologos.cc/logos/tron-trx-logo.png" alt="TRX Logo" class="trx-logo" />
-      <p class="info">💰 Modal: <b>Rp 90.000</b></p>
-      <p class="info">📈 Keuntungan: <b>180%</b> (Rp 162.000 total)</p>
-      <p class="info">⏳ Durasi: <b>3 Hari</b> (Rp 54.000/hari)</p>
-      <p class="info">Saldo Anda: <b id="saldoText">Memuat...</b></p>
-      <button class="btn" id="investBtn">Mulai Investasi</button>
-      <div id="message"></div>
-    </div>
-    <div class="back">
-      <a href="dashboard.html">⬅ Kembali ke Dashboard</a>
-    </div>
-  </div>
+  <header class="topbar">
+    <img src="assets/logo.svg" class="logo-small" alt="IndoCapital">
+    <h1>Investasi</h1>
+  </header>
 
-  <script type="module">
-    import { firebaseObj } from './firebase.js';
-    const {
-      auth, db, doc, getDoc, updateDoc, Timestamp, collection, addDoc, onAuthStateChanged
-    } = firebaseObj;
+  <main class="dashboard-container">
+    <section class="balance-card">
+      <p>Saldo Kamu</p>
+      <h2 id="userBalance">Rp0</h2>
+    </section>
 
-    const investBtn = document.getElementById('investBtn');
-    const saldoText = document.getElementById('saldoText');
-    const message = document.getElementById('message');
+    <section class="invest-card">
+      <h3>Pilih Produk Investasi</h3>
 
-    const MODAL = 90000;
-    const HARI = 3;
-    const TOTAL_KEUNTUNGAN = MODAL * 1.8; // 180%
+      <form id="investForm">
+        <label for="product">Produk</label>
+        <select id="product" required>
+          <option value="">-- Pilih Produk --</option>
+          <option value="emas">Investasi Emas</option>
+          <option value="crypto">Crypto Fund</option>
+          <option value="startup">Startup Capital</option>
+        </select>
 
-    let currentUser;
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const saldo = snap.data().saldo || 0;
-          saldoText.innerText = 'Rp ' + saldo.toLocaleString();
-        } else {
-          saldoText.innerText = 'Data tidak ditemukan';
-        }
-      } else {
-        window.location.href = 'index.html';
-      }
+        <label for="amount">Jumlah Investasi (Rp)</label>
+        <input type="number" id="amount" placeholder="Minimal 100.000" min="100000" required>
+
+        <label for="payment">Metode Pembayaran</label>
+        <select id="payment" required>
+          <option value="">-- Pilih Metode --</option>
+          <option value="bank">Transfer Bank</option>
+          <option value="ewallet">E-Wallet</option>
+          <option value="tripay">Tripay (Gateway)</option>
+        </select>
+
+        <button type="submit" class="btn-primary">Bayar Sekarang</button>
+      </form>
+    </section>
+
+    <section id="paymentResult" class="hidden">
+      <h3>Pembayaran Berhasil ✅</h3>
+      <p>Investasi kamu sebesar <span id="paidAmount"></span> telah tercatat.</p>
+      <a href="dashboard.html" class="btn-secondary">Kembali ke Dashboard</a>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html">🏠</a>
+    <a href="invest.html" class="active">💰</a>
+    <a href="history.html">📜</a>
+    <a href="profile.html">👤</a>
+    <a href="referral.html">🔗</a>
+  </nav>
+
+  <script src="assets/script.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (!user) window.location.href = 'index.html';
+    document.getElementById('userBalance').textContent = 'Rp' + (user.balance || 0).toLocaleString();
+
+    const form = document.getElementById('investForm');
+    const result = document.getElementById('paymentResult');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const amount = parseInt(document.getElementById('amount').value);
+      user.balance = (user.balance || 0) + amount;
+      localStorage.setItem('currentUser', JSON.stringify(user));
+
+      const txHistory = JSON.parse(localStorage.getItem('transactions')) || [];
+      txHistory.push({ type: 'Investasi', amount, date: new Date().toLocaleString() });
+      localStorage.setItem('transactions', JSON.stringify(txHistory));
+
+      document.getElementById('paidAmount').textContent = 'Rp' + amount.toLocaleString();
+      form.classList.add('hidden');
+      result.classList.remove('hidden');
     });
-
-    investBtn.onclick = async () => {
-      investBtn.disabled = true;
-      message.innerText = '';
-
-      const userRef = doc(db, 'users', currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      const saldo = userSnap.data().saldo || 0;
-
-      if (saldo < MODAL) {
-        message.innerText = '❌ Saldo tidak cukup.';
-        investBtn.disabled = false;
-        return;
-      }
-
-      try {
-        await updateDoc(userRef, {
-          saldo: saldo - MODAL
-        });
-
-        await addDoc(collection(db, 'investasi'), {
-          userId: currentUser.uid,
-          email: currentUser.email,
-          namaProduk: 'Penambangan TRX',
-          modal: MODAL,
-          keuntunganTotal: TOTAL_KEUNTUNGAN,
-          perHari: TOTAL_KEUNTUNGAN / HARI,
-          status: 'aktif',
-          hariBerjalan: 0,
-          createdAt: Timestamp.now()
-        });
-
-        message.innerText = '✅ Investasi berhasil dimulai!';
-        investBtn.disabled = true;
-      } catch (err) {
-        console.error(err);
-        message.innerText = '❌ Terjadi kesalahan. Coba lagi.';
-        investBtn.disabled = false;
-      }
-    };
   </script>
 </body>
 </html>
