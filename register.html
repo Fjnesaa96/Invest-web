@@ -1,283 +1,45 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>IndoCapital — Investasi Modern</title>
-  <meta name="description" content="Platform investasi IndoCapital — login, register, dashboard, pembayaran, profil, riwayat transaksi, dan sistem referal (simulasi)." />
-  <style>
-    :root{--bg:#071029;--card:#0f2340;--muted:#9fb0cf;--accent:#1e90ff;--accent-2:#0b66d1;--success:#00e676;--glass:rgba(255,255,255,0.03);--radius:12px;font-family:Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial}
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#021428);color:#eaf4ff;min-height:100vh}
-    .wrap{max-width:980px;margin:24px auto;padding:16px}
-    header{display:flex;align-items:center;gap:16px}
-    .logo{display:flex;align-items:center;gap:12px}
-    .logo svg{width:52px;height:52px}
-    .brand{font-weight:700;font-size:1.2rem;color:var(--accent)}
-    .tag{color:var(--muted);font-size:0.9rem}
-    .grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
-    @media(min-width:900px){.grid{grid-template-columns:360px 1fr}}
-    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 6px 30px rgba(2,8,23,0.6)}
-    label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit}
-    button{background:var(--accent);color:#04233a;border:none;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
-    .muted{color:var(--muted);font-size:0.9rem}
-    .mobile-nav{position:fixed;left:0;right:0;bottom:0;background:#021428;border-top:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-around;padding:8px}
-    .mobile-nav button{background:transparent;border:none;color:var(--muted);font-weight:600}
-    .mobile-nav button.active{color:var(--accent)}
-    .notice{background:linear-gradient(90deg,rgba(30,144,255,0.07),rgba(11,102,209,0.03));padding:10px;border-radius:10px;color:var(--muted)}
-    .ref-card{display:flex;flex-direction:column;gap:8px;align-items:center}
-    .ref-code{font-weight:800;background:linear-gradient(90deg,#0b66d1,#48a1ff);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.3rem}
-    .small{font-size:0.9rem;color:var(--muted)}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03)}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar | IndoCapital</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">
-        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="IndoCapital logo">
-          <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#48a1ff" /><stop offset="1" stop-color="#0b66d1" /></linearGradient></defs>
-          <g transform="translate(0,0)">
-            <rect width="120" height="120" rx="20" fill="none" />
-            <g transform="translate(24,24)">
-              <rect x="0" y="36" width="10" height="24" rx="2" fill="url(#g1)" />
-              <rect x="16" y="20" width="10" height="40" rx="2" fill="#2b88ff" />
-              <rect x="32" y="6" width="10" height="54" rx="2" fill="#0b66d1" />
-              <circle cx="52" cy="6" r="6" fill="#0b66d1" opacity="0.9" />
-            </g>
-          </g>
-        </svg>
-        <div>
-          <div class="brand">IndoCapital</div>
-          <div class="tag">Smart investing for everyone</div>
-        </div>
-      </div>
-    </header>
+  <div class="container">
+    <div class="login-card">
+      <img src="assets/logo.svg" alt="IndoCapital Logo" class="logo">
+      <h2>Buat Akun IndoCapital</h2>
 
-    <main class="grid">
-      <section class="card" id="left-col">
-        <div id="auth-area">
-          <div id="login-box">
-            <h3>Masuk ke akun</h3>
-            <div class="muted small">Gunakan email yang terdaftar</div>
-            <label>Email</label>
-            <input id="login-email" type="email" placeholder="email@contoh.com">
-            <label>Password</label>
-            <input id="login-pass" type="password" placeholder="********">
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button onclick="doLogin()">Login</button>
-              <button onclick="showRegister()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Register</button>
-            </div>
-          </div>
+      <form id="registerForm">
+        <label for="name">Nama Lengkap</label>
+        <input type="text" id="registerName" placeholder="Nama lengkap kamu" required>
 
-          <div id="register-box" style="display:none">
-            <h3>Buat Akun Baru</h3>
-            <label>Nama Lengkap</label>
-            <input id="reg-name" type="text" placeholder="Nama kamu">
-            <label>Email</label>
-            <input id="reg-email" type="email" placeholder="email@contoh.com">
-            <label>Password</label>
-            <input id="reg-pass" type="password" placeholder="minimal 6 karakter">
-            <label>Konfirmasi Password</label>
-            <input id="reg-pass2" type="password" placeholder="konfirmasi">
-            <label>Kode Referal (opsional)</label>
-            <input id="reg-ref" type="text" placeholder="IC... atau terisi otomatis dari link">
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button onclick="doRegister()">Daftar</button>
-              <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Kembali</button>
-            </div>
-          </div>
+        <label for="email">Email</label>
+        <input type="email" id="registerEmail" placeholder="Alamat email" required>
 
-          <div id="profile-box" style="display:none">
-            <h3>Profil</h3>
-            <div class="muted">Nama</div>
-            <div id="profile-name" style="font-weight:700;margin-bottom:8px"></div>
-            <div class="muted">Email</div>
-            <div id="profile-email" style="font-weight:700;margin-bottom:8px"></div>
-            <div class="muted">Saldo</div>
-            <div id="profile-balance" style="font-weight:700;margin-bottom:8px"></div>
-            <button onclick="showEditProfile()">Edit Profil</button>
-            <button onclick="doLogout()" style="background:#ff6b6b;color:#fff;margin-top:8px">Keluar</button>
-          </div>
+        <label for="password">Kata Sandi</label>
+        <input type="password" id="registerPassword" placeholder="Buat kata sandi" required>
 
-          <div id="edit-profile" style="display:none">
-            <h3>Edit Profil</h3>
-            <label>Nama</label>
-            <input id="edit-name" type="text">
-            <label>Nomor Telepon</label>
-            <input id="edit-phone" type="text">
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button onclick="saveProfile()">Simpan</button>
-              <button onclick="cancelEditProfile()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Batal</button>
-            </div>
-          </div>
-        </div>
-      </section>
+        <label for="referral">Kode Referal (opsional)</label>
+        <input type="text" id="registerReferral" placeholder="Masukkan kode referal jika ada">
 
-      <section class="card" id="main-col">
-        <div id="welcome" class="center">
-          <h2>Selamat datang di IndoCapital</h2>
-          <p class="muted">Platform investasi modern. Mulai investasi, lihat riwayat, dan bagikan referalmu.</p>
-          <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
-            <button onclick="goInvest()">Mulai Investasi</button>
-            <button onclick="showTransactions()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Lihat Riwayat</button>
-          </div>
-        </div>
+        <button type="submit" class="btn-primary">Daftar</button>
+      </form>
 
-        <div id="invest-area" style="display:none">
-          <h3>Pilih Produk Investasi</h3>
-          <label>Produk</label>
-          <select id="prod-select">
-            <option value="reksa">Reksa Dana</option>
-            <option value="saham">Saham</option>
-            <option value="crypto">Crypto</option>
-          </select>
-          <label>Jumlah (Rp)</label>
-          <input id="amt-input" type="number" placeholder="100000">
-          <label>Metode Pembayaran</label>
-          <select id="pay-method">
-            <option value="bank">Transfer Bank</option>
-            <option value="ewallet">E-Wallet</option>
-            <option value="virtual">Virtual Account</option>
-          </select>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button onclick="makePayment()">Bayar & Invest</button>
-            <button onclick="cancelInvest()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Batal</button>
-          </div>
-          <div style="margin-top:12px" class="notice">Catatan: Ini adalah simulasi. Integrasi payment gateway dapat ditambahkan (Tripay, Midtrans, Xendit, dsb).</div>
-        </div>
-
-        <div id="txn-area" style="display:none">
-          <h3>Riwayat Transaksi</h3>
-          <div id="txn-list" style="margin-top:8px"></div>
-        </div>
-
-        <div id="ref-area" style="display:none">
-          <h3>Referal Saya</h3>
-          <div class="ref-card">
-            <div class="small">Kode referal kamu</div>
-            <div id="my-ref-code" class="ref-code">-</div>
-            <div style="display:flex;gap:8px">
-              <button onclick="copyRef()">Salin Kode</button>
-              <button onclick="shareRef()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Bagikan Link</button>
-            </div>
-            <div class="small">Link pendaftaran: <span id="ref-link">-</span></div>
-            <div style="margin-top:8px" class="small">Jumlah referral berhasil: <span id="ref-count">0</span></div>
-            <div style="margin-top:8px" class="small">Total bonus dari referral: <span id="ref-bonus">Rp0</span></div>
-          </div>
-        </div>
-
-        <div style="margin-top:18px;color:var(--muted);font-size:0.9rem">Versi: 1.1 • IndoCapital</div>
-      </section>
-    </main>
-
-    <div style="height:84px"></div>
-
-    <div class="mobile-nav">
-      <button id="nav-home" class="active" onclick="navTo('home')">Beranda</button>
-      <button id="nav-invest" onclick="navTo('invest')">Invest</button>
-      <button id="nav-txn" onclick="navTo('txn')">Riwayat</button>
-      <button id="nav-profile" onclick="navTo('profile')">Profil</button>
-      <button id="nav-ref" onclick="navTo('ref')">Referal</button>
+      <p class="redirect-text">Sudah punya akun?
+        <a href="index.html">Masuk Sekarang</a>
+      </p>
     </div>
   </div>
 
+  <script src="assets/script.js"></script>
   <script>
-    // Storage keys
-    const USERS_KEY = 'ic_users_v2';
-    const SESS_KEY = 'ic_sess_v2';
-    const TXN_KEY = 'ic_txn_v2';
-
-    // Referral config
-    const REF_PREFIX = 'IC';
-    const REF_BONUS = 10000; // Rp10.000 per referral
-
-    // utils
-    function randCode(len=6){const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let s='';for(let i=0;i<len;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s}
-    function genRef(){return REF_PREFIX+randCode(6)}
-    function load(k){return JSON.parse(localStorage.getItem(k)||'[]')}
-    function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
-
-    // parse ref from URL if present
-    function getUrlRef(){const p=new URLSearchParams(location.search);return p.get('ref')}
-
-    // auth & users
-    function loadUsers(){return load(USERS_KEY)}
-    function saveUsers(u){save(USERS_KEY,u)}
-    function saveTxns(t){save(TXN_KEY,t)}
-    function loadTxns(){return load(TXN_KEY)}
-
-    function showRegister(){document.getElementById('login-box').style.display='none';document.getElementById('register-box').style.display='block';const r=getUrlRef();if(r)document.getElementById('reg-ref').value=r}
-    function showLogin(){document.getElementById('register-box').style.display='none';document.getElementById('login-box').style.display='block'}
-
-    function doRegister(){
-      const name=document.getElementById('reg-name').value.trim();
-      const email=document.getElementById('reg-email').value.trim().toLowerCase();
-      const pass=document.getElementById('reg-pass').value;const pass2=document.getElementById('reg-pass2').value;
-      const ref=document.getElementById('reg-ref').value.trim().toUpperCase();
-      if(!name||!email||!pass){alert('Lengkapi data');return}
-      if(pass.length<6){alert('Password minimal 6 karakter');return}
-      if(pass!==pass2){alert('Password tidak cocok');return}
-      const users=loadUsers();if(users.find(u=>u.email===email)){alert('Email sudah terdaftar');return}
-      let myRef=genRef();
-      // ensure unique
-      while(users.find(u=>u.ref===myRef)){myRef=genRef()}
-      const user={name,email,pass,balance:0,phone:'',ref:myRef,refCount:0,refBonus:0}
-      users.push(user);saveUsers(users);
-      // if ref provided and valid, credit bonus to referrer
-      if(ref){const inviter=users.find(u=>u.ref===ref);if(inviter){inviter.refCount=(inviter.refCount||0)+1;inviter.refBonus=(inviter.refBonus||0)+REF_BONUS;inviter.balance=(inviter.balance||0)+REF_BONUS;saveUsers(users); // add txn record
-        const txns=loadTxns();txns.unshift({id:'REF'+Date.now(),email:inviter.email,prod:'REFERRAL_BONUS',amt:REF_BONUS,method:'REF',status:'SUCCESS',time:new Date().toISOString()});saveTxns(txns);
-      }}
-      alert('Pendaftaran berhasil — silakan login. Kode referal kamu: '+myRef);
-      showLogin();
-    }
-
-    function doLogin(){const email=document.getElementById('login-email').value.trim().toLowerCase();const pass=document.getElementById('login-pass').value;const users=loadUsers();const u=users.find(x=>x.email===email&&x.pass===pass);if(!u){alert('Email atau password salah');return}localStorage.setItem(SESS_KEY,email);renderProfile();navTo('home');alert('Login sukses!')}
-
-    function currentUser(){return localStorage.getItem(SESS_KEY)}
-    function sessionEnd(){localStorage.removeItem(SESS_KEY)}
-
-    function renderProfile(){const email=currentUser();if(!email)return;const users=loadUsers();const u=users.find(x=>x.email===email);if(!u)return;document.getElementById('profile-name').textContent=u.name||'-';document.getElementById('profile-email').textContent=u.email;document.getElementById('profile-balance').textContent=formatRp(u.balance||0);document.getElementById('login-box').style.display='none';document.getElementById('register-box').style.display='none';document.getElementById('profile-box').style.display='block';document.getElementById('edit-profile').style.display='none';}
-
-    function doLogout(){if(confirm('Yakin ingin logout?')){sessionEnd();document.getElementById('profile-box').style.display='none';document.getElementById('login-box').style.display='block';navTo('home')}}
-    function showEditProfile(){const email=currentUser();if(!email)return;const users=loadUsers();const u=users.find(x=>x.email===email);document.getElementById('edit-name').value=u.name||'';document.getElementById('edit-phone').value=u.phone||'';document.getElementById('profile-box').style.display='none';document.getElementById('edit-profile').style.display='block'}
-    function cancelEditProfile(){renderProfile()}function saveProfile(){const email=currentUser();if(!email)return;const users=loadUsers();const u=users.find(x=>x.email===email);u.name=document.getElementById('edit-name').value.trim();u.phone=document.getElementById('edit-phone').value.trim();saveUsers(users);alert('Profil disimpan');renderProfile()}
-
-    // investment & txns
-    function goInvest(){if(!currentUser()){alert('Silakan login terlebih dahulu');return}document.getElementById('welcome').style.display='none';document.getElementById('invest-area').style.display='block';document.getElementById('txn-area').style.display='none'}
-    function cancelInvest(){document.getElementById('invest-area').style.display='none';document.getElementById('welcome').style.display='block'}
-    function makePayment(){const prod=document.getElementById('prod-select').value;const amt=Number(document.getElementById('amt-input').value);const method=document.getElementById('pay-method').value;if(!prod||!amt||amt<=0){alert('Isi produk dan jumlah dengan benar');return}const email=currentUser();if(!email){alert('Silakan login');return}const txns=loadTxns();const id='TXN'+Date.now();const tx={id,email,prod,amt,method,status:'SUCCESS',time:new Date().toISOString()};txns.unshift(tx);saveTxns(txns);const users=loadUsers();const u=users.find(x=>x.email===email);u.balance=(u.balance||0)+amt;saveUsers(users);alert('Pembayaran berhasil — investasi tercatat');renderProfile();navTo('txn')}
-
-    function showTransactions(){document.getElementById('welcome').style.display='none';document.getElementById('invest-area').style.display='none';document.getElementById('txn-area').style.display='block';renderTransactions()}
-    function renderTransactions(){const email=currentUser();const listEl=document.getElementById('txn-list');listEl.innerHTML='';const txns=loadTxns().filter(t=>t.email===email);if(txns.length===0){listEl.innerHTML='<div class="muted">Belum ada transaksi</div>';return}let html='<table><thead><tr><th>ID</th><th>Produk</th><th>Jumlah</th><th>Metode</th><th>Status</th></tr></thead><tbody>';txns.forEach(t=>{html+=`<tr><td>${t.id}</td><td>${t.prod}</td><td>${formatRp(t.amt)}</td><td>${t.method}</td><td>${t.status}</td></tr>`});html+='</tbody></table>';listEl.innerHTML=html}
-
-    function formatRp(x){return 'Rp'+Number(x).toLocaleString('id-ID')}
-
-    // referral
-    function ensureRefForCurrent(){const email=currentUser();if(!email)return;const users=loadUsers();const u=users.find(x=>x.email===email);if(!u.ref){u.ref=genRef();saveUsers(users)}return u.ref}
-    function renderReferral(){const email=currentUser();if(!email) return;const users=loadUsers();const u=users.find(x=>x.email===email);if(!u) return;document.getElementById('my-ref-code').textContent=u.ref||ensureRefForCurrent();const link=location.origin+location.pathname.replace(/index.html$|\/register.html$/,'/register.html')+'?ref='+u.ref;document.getElementById('ref-link').textContent=link;document.getElementById('ref-count').textContent=(u.refCount||0);document.getElementById('ref-bonus').textContent=formatRp(u.refBonus||0)}
-    function copyRef(){const code=document.getElementById('my-ref-code').textContent;navigator.clipboard.writeText(code).then(()=>alert('Kode referal disalin: '+code))}
-    function shareRef(){const link=document.getElementById('ref-link').textContent;if(navigator.share){navigator.share({title:'Daftar IndoCapital',text:'Gabung IndoCapital, dapat bonus!',url:link}).catch(()=>{});}else{prompt('Salin link pendaftaran:',link)}}
-
-    // navigation
-    function navTo(page){document.querySelectorAll('.mobile-nav button').forEach(b=>b.classList.remove('active'));
-      if(page==='home'){document.getElementById('nav-home').classList.add('active');document.getElementById('welcome').style.display='block';document.getElementById('invest-area').style.display='none';document.getElementById('txn-area').style.display='none';document.getElementById('ref-area').style.display='none'}
-      if(page==='invest'){document.getElementById('nav-invest').classList.add('active');goInvest();document.getElementById('ref-area').style.display='none'}
-      if(page==='txn'){document.getElementById('nav-txn').classList.add('active');showTransactions();document.getElementById('ref-area').style.display='none'}
-      if(page==='profile'){document.getElementById('nav-profile').classList.add('active');renderProfile();document.getElementById('welcome').style.display='none';document.getElementById('invest-area').style.display='none';document.getElementById('txn-area').style.display='none';document.getElementById('ref-area').style.display='none'}
-      if(page==='ref'){document.getElementById('nav-ref').classList.add('active');document.getElementById('welcome').style.display='none';document.getElementById('invest-area').style.display='none';document.getElementById('txn-area').style.display='none';document.getElementById('ref-area').style.display='block';renderReferral()}
-    }
-
-    // on load
-    window.addEventListener('load',()=>{
-      // ensure register URL auto-fills ref param handled when opening register
-      const ref=getUrlRef();if(ref){document.getElementById('reg-ref').value=ref}
-      const sess=currentUser();if(sess){renderProfile();}
-      else{document.getElementById('login-box').style.display='block'}
-    })
+    // Isi otomatis kode referal dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) document.getElementById('registerReferral').value = refCode;
   </script>
 </body>
-  </html>
-  
+</html>
