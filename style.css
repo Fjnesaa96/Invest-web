@@ -1,80 +1,163 @@
-/* Reset */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ===========================
+   INDOCAPITAL - STYLE SHEET
+   =========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+:root {
+  --primary: #007bff;
+  --secondary: #0056b3;
+  --bg: #f4f7fb;
+  --text: #222;
+  --white: #fff;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+  --radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #003366, #004080);
-  color: #fff;
-  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Container */
-.container {
-  background: #fff;
-  color: #333;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  width: 100%;
-  max-width: 400px;
+header.topbar {
+  background: var(--primary);
+  color: var(--white);
   text-align: center;
+  padding: 16px;
+  box-shadow: var(--shadow);
 }
 
-h2 { margin-bottom: 20px; color: #004080; }
+.logo-small {
+  height: 32px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
 
-input, select, button {
+main {
+  flex: 1;
+  padding: 20px;
+}
+
+/* CARD STYLE */
+.card, .referal-card {
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+h1, h2, h3 {
+  color: var(--secondary);
+  margin-bottom: 12px;
+}
+
+p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* INPUTS & BUTTONS */
+input, textarea, select {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
+  padding: 10px;
+  border-radius: var(--radius);
   border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
+  margin-bottom: 12px;
+  font-size: 15px;
 }
 
-button {
-  background: #004080;
-  color: #fff;
+button, .btn-primary, .btn-secondary {
+  display: inline-block;
+  width: 100%;
+  padding: 10px 14px;
   border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
 }
 
-button:hover { background: #0066cc; }
-
-a { color: #004080; text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* Dashboard */
-.dashboard-container {
-  background: #fff;
-  color: #333;
-  padding: 30px;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 600px;
-  text-align: center;
+.btn-primary {
+  background: var(--primary);
+  color: var(--white);
 }
 
-.dashboard-container h2 {
-  margin-bottom: 10px;
+.btn-primary:hover {
+  background: var(--secondary);
 }
 
-.menu {
+.btn-secondary {
+  background: #eaeaea;
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: #dcdcdc;
+}
+
+/* NAVIGATION */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
 }
 
-.menu a, .menu button {
-  background: #004080;
-  color: #fff;
-  margin: 5px;
-  padding: 12px 20px;
-  border-radius: 8px;
+.bottom-nav a {
   text-decoration: none;
-  flex: 1 1 40%;
-  text-align: center;
+  color: var(--text);
+  font-size: 22px;
 }
+
+.bottom-nav a.active {
+  color: var(--primary);
+}
+
+/* REFERRAL */
+.ref-box {
+  display: flex;
+  gap: 8px;
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* ALERT STYLE */
+.alert {
+  background: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  border: 1px solid #c3e6cb;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  header.topbar h1 {
+    font-size: 18px;
+  }
+
+  .bottom-nav a {
+    font-size: 20px;
+  }
+  }
